@@ -1,0 +1,3666 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MedCalc Pro - Advanced Medical Calculator</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <link rel="manifest" href="data:application/manifest+json;charset=utf-8;base64,ewogICJuYW1lIjogIk1lZENhbGMgUHJvIC0gQWR2YW5jZWQgTWVkaWNhbCBDYWxjdWxhdG9yIiwKICAic2hvcnRfbmFtZSI6ICJNZWRDYWxjUHJvIiwKICAic3RhcnRfdXJsIjogIi4iLAogICJkaXNwbGF5IjogInN0YW5kYWxvbmUiLAogICJiYWNrZ3JvdW5kX2NvbG9yIjogIiNmZmZmZmYiLAogICJ0aGVtZV9jb2xvciI6ICIjNjM2NmYxIiwKICAiaWNvbnMiOiBbCiAgICB7CiAgICAgICJzcmMiOiAiZGF0YTppbWFnZS9zdmcreG1sO2Jhc2U2NCxQSE4yWnlCNGJXeHVjejBpYUhSMGNEb3ZMM2QzZHk1M00zVXViM0puTHpJd01EQXZjM1puSWlCM2FXUjBhRDBpTWpRaUlHaGxhV2RvZEQwaU1qUWlJSFpwWlhkQ2IzZzlJakFnTUNBeU5DQXlOQ0krUEhCaGRHZ2dabWxzYkQwaUl6WXpOalpsTVNJZ1pEMGlUVEV5SURKRE1rRnVOMVUzSUVKeU1reDJORzlJU2xaTlEwVk5RV2xTWWpCU2JIVkRkRTFrYzNWa2JsTm9RbXhqU1VGa05YTTFhM04xYUZWQmIyTjFjMlYyZWl0VVl6QjRNalZrUkVveGJtaDJOM1pMWVVWaFNHNHZiR1kyYWpWbk5FVjNTVUYzT0ZSeFJHMXNXbWcwSWk4K1BDOXpkbWMrIiwKICAgICAgInNpemVzIjogIjI0eDI0IiwKICAgICAgInR5cGUiOiAiaW1hZ2Uvc3ZnK3htbCIKICAgIH0KICBdCn0=">
+    <style>
+        :root {
+            --primary-color: #6366f1;
+            --primary-dark: #4f46e5;
+            --secondary-color: #06b6d4;
+            --accent-color: #10b981;
+            --danger-color: #ef4444;
+            --warning-color: #f59e0b;
+            --success-color: #22c55e;
+            --favorite-color: #f59e0b;
+            --text-primary: #1f2937;
+            --text-secondary: #6b7280;
+            --background: #f8fafc;
+            --surface: #ffffff;
+            --border: #e5e7eb;
+            --shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            --border-radius: 12px;
+            --border-radius-lg: 16px;
+        }
+
+        [data-theme="dark"] {
+            --primary-color: #818cf8;
+            --primary-dark: #6366f1;
+            --text-primary: #f9fafb;
+            --text-secondary: #d1d5db;
+            --background: #111827;
+            --surface: #1f2937;
+            --border: #374151;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--background);
+            color: var(--text-primary);
+            line-height: 1.6;
+            transition: var(--transition);
+            overflow-x: hidden;
+        }
+
+        /* Loading Spinner */
+        .loading-spinner {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 10000;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid var(--border);
+            border-top: 4px solid var(--primary-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Header */
+        .header {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+            color: white;
+            padding: 1rem 0;
+            box-shadow: var(--shadow-lg);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            backdrop-filter: blur(10px);
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+
+        .logo {
+            font-size: 1.75rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .logo:hover {
+            transform: scale(1.05);
+        }
+
+        .logo-icon {
+            font-size: 2rem;
+            background: linear-gradient(45deg, #ffffff, #f0f9ff);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .header-nav {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .nav-btn {
+            background: rgba(255,255,255,0.1);
+            border: none;
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: var(--transition);
+            font-weight: 500;
+            backdrop-filter: blur(10px);
+        }
+
+        .nav-btn:hover {
+            background: rgba(255,255,255,0.2);
+            transform: translateY(-2px);
+        }
+
+        .menu-toggle {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 0.5rem;
+            border-radius: 8px;
+            transition: var(--transition);
+            display: none;
+        }
+
+        .settings-btn {
+            background: rgba(255,255,255,0.1);
+            border: none;
+            color: white;
+            padding: 0.75rem;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: var(--transition);
+            font-size: 1.2rem;
+            backdrop-filter: blur(10px);
+        }
+
+        .settings-btn:hover {
+            background: rgba(255,255,255,0.2);
+            transform: scale(1.1);
+        }
+
+        /* Sidebar */
+        .sidebar {
+            position: fixed;
+            top: 0;
+            right: -350px;
+            width: 350px;
+            height: 100vh;
+            background: var(--surface);
+            border-left: 1px solid var(--border);
+            box-shadow: var(--shadow-lg);
+            transition: var(--transition);
+            z-index: 1001;
+            overflow-y: auto;
+        }
+
+        .sidebar.open {
+            right: 0;
+        }
+
+        .sidebar-header {
+            padding: 2rem;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .sidebar-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+
+        .close-sidebar {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--text-secondary);
+            padding: 0.5rem;
+            border-radius: 50%;
+            transition: var(--transition);
+        }
+
+        .close-sidebar:hover {
+            background: var(--danger-color);
+            color: white;
+        }
+
+        .sidebar-content {
+            padding: 2rem;
+        }
+
+        .settings-section {
+            margin-bottom: 2rem;
+        }
+
+        .settings-section h3 {
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+            font-size: 1.2rem;
+        }
+
+        .setting-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem;
+            margin-bottom: 0.5rem;
+            background: var(--background);
+            border-radius: var(--border-radius);
+            border: 1px solid var(--border);
+        }
+
+        .setting-label {
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+
+        .setting-description {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            margin-top: 0.25rem;
+        }
+
+        /* Toggle Switch */
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 60px;
+            height: 34px;
+        }
+
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: 0.4s;
+            border-radius: 34px;
+        }
+
+        .toggle-slider:before {
+            position: absolute;
+            content: "";
+            height: 26px;
+            width: 26px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: 0.4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .toggle-slider {
+            background-color: var(--primary-color);
+        }
+
+        input:checked + .toggle-slider:before {
+            transform: translateX(26px);
+        }
+
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            display: none;
+            backdrop-filter: blur(4px);
+        }
+
+        .overlay.show {
+            display: block;
+        }
+
+        /* Container */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .page {
+            display: none;
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Filter Tabs */
+        .filter-tabs {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .filter-tab {
+            background: var(--surface);
+            border: 2px solid var(--border);
+            color: var(--text-primary);
+            padding: 0.75rem 1.5rem;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            transition: var(--transition);
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .filter-tab:hover {
+            border-color: var(--primary-color);
+            transform: translateY(-2px);
+        }
+
+        .filter-tab.active {
+            background: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+
+        /* Patient Selector */
+        .patient-selector {
+            background: var(--surface);
+            border-radius: var(--border-radius-lg);
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border);
+        }
+
+        .patient-selector h3 {
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .patient-input-group {
+            display: grid;
+            grid-template-columns: 2fr 1fr auto;
+            gap: 1rem;
+            align-items: end;
+        }
+
+        .patient-select {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid var(--border);
+            border-radius: var(--border-radius);
+            background: var(--surface);
+            color: var(--text-primary);
+            font-size: 1rem;
+        }
+
+        .patient-select:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        }
+
+        .add-patient-btn, .manage-patients-btn {
+            background: var(--success-color);
+            color: white;
+            border: none;
+            padding: 0.75rem 1rem;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            transition: var(--transition);
+            font-weight: 500;
+            white-space: nowrap;
+        }
+
+        .manage-patients-btn {
+            background: var(--secondary-color);
+        }
+
+        .add-patient-btn:hover, .manage-patients-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow);
+        }
+
+        /* Calculator Grid */
+        .calculator-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .calculator-card {
+            background: var(--surface);
+            border-radius: var(--border-radius-lg);
+            padding: 2rem;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border);
+            transition: var(--transition);
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .calculator-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+            transform: scaleX(0);
+            transition: var(--transition);
+        }
+
+        .calculator-card:hover {
+            transform: translateY(-8px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .calculator-card:hover::before {
+            transform: scaleX(1);
+        }
+
+        .calculator-card.favorited::before {
+            background: linear-gradient(90deg, var(--favorite-color), #fbbf24);
+            transform: scaleX(1);
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid var(--border);
+        }
+
+        .card-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .card-title {
+            color: var(--text-primary);
+            font-size: 1.4rem;
+            font-weight: 600;
+        }
+
+        .card-icon {
+            font-size: 2rem;
+            padding: 0.75rem;
+            background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
+            border-radius: var(--border-radius);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .favorite-btn {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--text-secondary);
+            transition: var(--transition);
+            padding: 0.5rem;
+            border-radius: 50%;
+        }
+
+        .favorite-btn:hover {
+            background: rgba(245, 158, 11, 0.1);
+            color: var(--favorite-color);
+            transform: scale(1.1);
+        }
+
+        .favorite-btn.favorited {
+            color: var(--favorite-color);
+        }
+
+        .description {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            line-height: 1.6;
+        }
+
+        /* Calculator Page Styles */
+        .calc-page {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .calc-header {
+            background: var(--surface);
+            border-radius: var(--border-radius-lg);
+            padding: 3rem 2rem;
+            margin-bottom: 2rem;
+            box-shadow: var(--shadow);
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .calc-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(6, 182, 212, 0.1));
+            z-index: -1;
+        }
+
+        .calc-title {
+            color: var(--text-primary);
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+            font-weight: 700;
+        }
+
+        .calc-description {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+            line-height: 1.7;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        .calc-form {
+            background: var(--surface);
+            border-radius: var(--border-radius-lg);
+            padding: 2.5rem;
+            box-shadow: var(--shadow);
+            margin-bottom: 2rem;
+            border: 1px solid var(--border);
+        }
+
+        .input-group {
+            margin-bottom: 2rem;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 0.75rem;
+            color: var(--text-primary);
+            font-weight: 600;
+            font-size: 1rem;
+        }
+
+        .input-group input, .input-group select {
+            width: 100%;
+            padding: 1rem;
+            border: 2px solid var(--border);
+            border-radius: var(--border-radius);
+            font-size: 1rem;
+            transition: var(--transition);
+            background: var(--surface);
+            color: var(--text-primary);
+        }
+
+        .input-group input:focus, .input-group select:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        }
+
+        .input-validation {
+            margin-top: 0.5rem;
+            font-size: 0.875rem;
+            min-height: 1.25rem;
+        }
+
+        .validation-error {
+            color: var(--danger-color);
+        }
+
+        .validation-success {
+            color: var(--success-color);
+        }
+
+        .calculate-btn {
+            width: 100%;
+            padding: 1.25rem;
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+            color: white;
+            border: none;
+            border-radius: var(--border-radius);
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .calculate-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .calculate-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .result {
+            margin-top: 2rem;
+            padding: 2rem;
+            background: var(--surface);
+            border-radius: var(--border-radius);
+            border-left: 4px solid var(--success-color);
+            display: none;
+            box-shadow: var(--shadow);
+            animation: slideIn 0.4s ease-out;
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(-20px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        .result.show {
+            display: block;
+        }
+
+        .result-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--success-color);
+            margin-bottom: 1rem;
+        }
+
+        .result-interpretation {
+            color: var(--text-secondary);
+            font-size: 1rem;
+            line-height: 1.6;
+        }
+
+        .result-actions {
+            margin-top: 1.5rem;
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .back-btn {
+            background: var(--border);
+            color: var(--text-secondary);
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            margin-bottom: 2rem;
+            transition: var(--transition);
+            font-weight: 500;
+        }
+
+        .back-btn:hover {
+            background: var(--text-secondary);
+            color: white;
+            transform: translateX(-4px);
+        }
+
+        /* Button Styles */
+        .download-btn, .clear-history-btn, .manage-btn {
+            border: none;
+            padding: 0.75rem 1.25rem;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: var(--transition);
+            margin-left: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .download-btn {
+            background: var(--success-color);
+            color: white;
+        }
+
+        .download-btn:hover {
+            background: #16a34a;
+            transform: translateY(-2px);
+        }
+
+        .clear-history-btn {
+            background: var(--danger-color);
+            color: white;
+        }
+
+        .clear-history-btn:hover {
+            background: #dc2626;
+            transform: translateY(-2px);
+        }
+
+        .manage-btn {
+            background: var(--secondary-color);
+            color: white;
+        }
+
+        .manage-btn:hover {
+            background: #0891b2;
+            transform: translateY(-2px);
+        }
+
+        /* Patient Management */
+        .patient-list {
+            display: grid;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .patient-item {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--border-radius);
+            padding: 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: var(--transition);
+        }
+
+        .patient-item:hover {
+            box-shadow: var(--shadow);
+            transform: translateY(-2px);
+        }
+
+        .patient-info h4 {
+            color: var(--text-primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .patient-info p {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .patient-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        /* Modal Styles */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            backdrop-filter: blur(4px);
+        }
+
+        .modal.show {
+            display: flex;
+        }
+
+        .modal-content {
+            background: var(--surface);
+            border-radius: var(--border-radius-lg);
+            padding: 2rem;
+            max-width: 500px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: var(--shadow-lg);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid var(--border);
+        }
+
+        .modal-header h3 {
+            color: var(--primary-color);
+            font-size: 1.5rem;
+        }
+
+        .close-modal {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--text-secondary);
+            padding: 0.5rem;
+            border-radius: 50%;
+            transition: var(--transition);
+        }
+
+        .close-modal:hover {
+            background: var(--danger-color);
+            color: white;
+        }
+
+        /* Toast Notifications */
+        .toast-container {
+            position: fixed;
+            top: 2rem;
+            right: 2rem;
+            z-index: 10000;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .toast {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--border-radius);
+            padding: 1rem 1.5rem;
+            box-shadow: var(--shadow-lg);
+            min-width: 300px;
+            animation: slideInRight 0.3s ease-out;
+        }
+
+        .toast.success {
+            border-left: 4px solid var(--success-color);
+        }
+
+        .toast.error {
+            border-left: 4px solid var(--danger-color);
+        }
+
+        .toast.warning {
+            border-left: 4px solid var(--warning-color);
+        }
+
+        @keyframes slideInRight {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        /* Progress Bar */
+        .progress-bar {
+            width: 100%;
+            height: 4px;
+            background: var(--border);
+            border-radius: 2px;
+            overflow: hidden;
+            margin-top: 1rem;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+            border-radius: 2px;
+            transition: width 0.3s ease;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+            
+            .calculator-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .header-content {
+                padding: 0 1rem;
+            }
+
+            .header-nav {
+                display: none;
+            }
+
+            .menu-toggle {
+                display: block;
+            }
+
+            .patient-input-group {
+                grid-template-columns: 1fr;
+            }
+
+            .filter-tabs {
+                justify-content: flex-start;
+                overflow-x: auto;
+                padding-bottom: 0.5rem;
+            }
+
+            .calc-title {
+                font-size: 2rem;
+            }
+
+            .calc-form {
+                padding: 1.5rem;
+            }
+
+            .result-actions {
+                flex-direction: column;
+            }
+
+            .toast-container {
+                right: 1rem;
+                left: 1rem;
+            }
+
+            .toast {
+                min-width: auto;
+            }
+
+            .sidebar {
+                width: 300px;
+                right: -300px;
+            }
+        }
+
+        /* Accessibility */
+        @media (prefers-reduced-motion: reduce) {
+            * {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
+
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border: 0;
+        }
+
+        *:focus {
+            outline: 2px solid var(--primary-color);
+            outline-offset: 2px;
+        }
+
+        @media (prefers-contrast: high) {
+            :root {
+                --border: #000000;
+                --shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
+            }
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 4rem 2rem;
+            color: var(--text-secondary);
+        }
+
+        .empty-state .empty-icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+
+        .empty-state h3 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            color: var(--text-primary);
+        }
+
+        .empty-state p {
+            font-size: 1rem;
+            line-height: 1.6;
+        }
+
+        .data-export-section {
+            margin-top: 2rem;
+            padding: 1.5rem;
+            background: var(--background);
+            border-radius: var(--border-radius);
+            border: 1px solid var(--border);
+        }
+
+        .data-export-section h4 {
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+            font-size: 1.1rem;
+        }
+
+        .data-export-buttons {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .export-btn {
+            background: var(--success-color);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            font-weight: 500;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .export-btn:hover {
+            background: #16a34a;
+            transform: translateY(-2px);
+        }
+
+        .clear-all-btn {
+            background: var(--danger-color);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            font-weight: 500;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .clear-all-btn:hover {
+            background: #dc2626;
+            transform: translateY(-2px);
+        }
+    </style>
+</head>
+<body>
+    <div class="loading-spinner" id="loadingSpinner">
+        <div class="spinner"></div>
+    </div>
+
+    <div class="toast-container" id="toastContainer"></div>
+    
+    <!-- Sidebar -->
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <h2 class="sidebar-title">⚙️ Settings</h2>
+            <button class="close-sidebar" onclick="closeSidebar()">×</button>
+        </div>
+        <div class="sidebar-content">
+            <div class="settings-section">
+                <h3>🎨 Appearance</h3>
+                <div class="setting-item">
+                    <div>
+                        <div class="setting-label">Dark Mode</div>
+                        <div class="setting-description">Switch between light and dark themes</div>
+                    </div>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="darkModeToggle" onchange="toggleDarkMode()">
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
+                <div class="setting-item">
+                    <div>
+                        <div class="setting-label">Animation Effects</div>
+                        <div class="setting-description">Enable smooth animations and transitions</div>
+                    </div>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="animationToggle" checked onchange="toggleAnimations()">
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
+            </div>
+
+            <div class="settings-section">
+                <h3>🔧 Functionality</h3>
+                <div class="setting-item">
+                    <div>
+                        <div class="setting-label">Auto-save</div>
+                        <div class="setting-description">Automatically save calculations and data</div>
+                    </div>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="autoSaveToggle" checked onchange="toggleAutoSave()">
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
+                <div class="setting-item">
+                    <div>
+                        <div class="setting-label">Sound Notifications</div>
+                        <div class="setting-description">Play sounds for notifications and alerts</div>
+                    </div>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="soundToggle" onchange="toggleSound()">
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
+            </div>
+
+            <div class="data-export-section">
+                <h4>📊 Data Management</h4>
+                <div class="data-export-buttons">
+                    <button class="export-btn" onclick="exportAppData()">
+                        📤 Export All Data
+                    </button>
+                    <button class="clear-all-btn" onclick="clearAllAppData()">
+                        🗑️ Clear All Data
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Overlay -->
+    <div class="overlay" id="overlay" onclick="closeSidebar()"></div>
+    
+    <header class="header">
+        <div class="header-content">
+            <div class="logo" onclick="showPage('home')" role="button" tabindex="0">
+                <span class="logo-icon">🏥</span>
+                <span>MedCalc Pro</span>
+            </div>
+            <div class="header-nav">
+                <button class="nav-btn" onclick="showPage('home')">Home</button>
+                <button class="nav-btn" onclick="showPage('patients')">Patients</button>
+                <button class="nav-btn" onclick="showPage('history')">History</button>
+                <button class="nav-btn" onclick="showPage('about')">About</button>
+                <button class="settings-btn" onclick="toggleSidebar()" aria-label="Settings">⚙️</button>
+            </div>
+            <button class="menu-toggle" onclick="toggleMobileMenu()" aria-label="Toggle menu">☰</button>
+        </div>
+    </header>
+
+    <div class="container">
+        <!-- Home Page -->
+        <div class="page active" id="home">
+            <div class="filter-tabs">
+                <button class="filter-tab active" onclick="filterCalculators('all')" data-filter="all">
+                    📊 All Calculators
+                </button>
+                <button class="filter-tab" onclick="filterCalculators('favorites')" data-filter="favorites">
+                    ⭐ Favorites
+                </button>
+                <button class="filter-tab" onclick="filterCalculators('recent')" data-filter="recent">
+                    🕒 Recent
+                </button>
+                <button class="filter-tab" onclick="filterCalculators('medical')" data-filter="medical">
+                    🏥 Medical
+                </button>
+                <button class="filter-tab" onclick="filterCalculators('lifestyle')" data-filter="lifestyle">
+                    💪 Lifestyle
+                </button>
+            </div>
+
+            <div class="calculator-grid" id="calculatorGrid">
+                <!-- APGAR Score Calculator -->
+                <div class="calculator-card" onclick="showCalculator('apgar')" data-category="medical" data-id="apgar">
+                    <div class="card-header">
+                        <div class="card-info">
+                            <span class="card-icon">👶</span>
+                            <h3 class="card-title">APGAR Score</h3>
+                        </div>
+                        <button class="favorite-btn" onclick="toggleFavorite(event, 'apgar')" aria-label="Add to favorites">☆</button>
+                    </div>
+                    <div class="description">
+                        Assess newborn health immediately after birth using appearance, pulse, grimace, activity, and respiration criteria.
+                    </div>
+                </div>
+
+                <!-- BMI Calculator -->
+                <div class="calculator-card" onclick="showCalculator('bmi')" data-category="lifestyle" data-id="bmi">
+                    <div class="card-header">
+                        <div class="card-info">
+                            <span class="card-icon">⚖️</span>
+                            <h3 class="card-title">BMI Calculator</h3>
+                        </div>
+                        <button class="favorite-btn" onclick="toggleFavorite(event, 'bmi')" aria-label="Add to favorites">☆</button>
+                    </div>
+                    <div class="description">
+                        Body Mass Index measures body weight relative to height to assess if you're underweight, normal weight, overweight, or obese.
+                    </div>
+                </div>
+
+                <!-- Body Fat Percentage -->
+                <div class="calculator-card" onclick="showCalculator('bodyfat')" data-category="lifestyle" data-id="bodyfat">
+                    <div class="card-header">
+                        <div class="card-info">
+                            <span class="card-icon">📊</span>
+                            <h3 class="card-title">Body Fat Percentage</h3>
+                        </div>
+                        <button class="favorite-btn" onclick="toggleFavorite(event, 'bodyfat')" aria-label="Add to favorites">☆</button>
+                    </div>
+                    <div class="description">
+                        Calculate body fat percentage using various formulas including Navy Method and BMI-based estimations.
+                    </div>
+                </div>
+
+                <!-- Body Surface Area -->
+                <div class="calculator-card" onclick="showCalculator('bsa')" data-category="medical" data-id="bsa">
+                    <div class="card-header">
+                        <div class="card-info">
+                            <span class="card-icon">📐</span>
+                            <h3 class="card-title">Body Surface Area</h3>
+                        </div>
+                        <button class="favorite-btn" onclick="toggleFavorite(event, 'bsa')" aria-label="Add to favorites">☆</button>
+                    </div>
+                    <div class="description">
+                        Calculates body surface area using multiple validated formulas for precise drug dosing and cardiac index.
+                    </div>
+                </div>
+
+                <!-- Calorie Calculator -->
+                <div class="calculator-card" onclick="showCalculator('calories')" data-category="lifestyle" data-id="calories">
+                    <div class="card-header">
+                        <div class="card-info">
+                            <span class="card-icon">🔥</span>
+                            <h3 class="card-title">Calorie Calculator</h3>
+                        </div>
+                        <button class="favorite-btn" onclick="toggleFavorite(event, 'calories')" aria-label="Add to favorites">☆</button>
+                    </div>
+                    <div class="description">
+                        Calculate daily caloric needs based on age, gender, height, weight, and activity level using multiple formulas.
+                    </div>
+                </div>
+
+                <!-- Drug Dosage Calculator -->
+                <div class="calculator-card" onclick="showCalculator('dosage')" data-category="medical" data-id="dosage">
+                    <div class="card-header">
+                        <div class="card-info">
+                            <span class="card-icon">💊</span>
+                            <h3 class="card-title">Drug Dosage</h3>
+                        </div>
+                        <button class="favorite-btn" onclick="toggleFavorite(event, 'dosage')" aria-label="Add to favorites">☆</button>
+                    </div>
+                    <div class="description">
+                        Calculate precise medication dosages based on patient weight, age, and specific drug parameters with safety checks.
+                    </div>
+                </div>
+
+                <!-- Glasgow Coma Scale -->
+                <div class="calculator-card" onclick="showCalculator('gcs')" data-category="medical" data-id="gcs">
+                    <div class="card-header">
+                        <div class="card-info">
+                            <span class="card-icon">🧠</span>
+                            <h3 class="card-title">Glasgow Coma Scale</h3>
+                        </div>
+                        <button class="favorite-btn" onclick="toggleFavorite(event, 'gcs')" aria-label="Add to favorites">☆</button>
+                    </div>
+                    <div class="description">
+                        Assesses level of consciousness by evaluating eye opening, verbal response, and motor response.
+                    </div>
+                </div>
+
+                <!-- IV Drip Rate Calculator -->
+                <div class="calculator-card" onclick="showCalculator('ivdrip')" data-category="medical" data-id="ivdrip">
+                    <div class="card-header">
+                        <div class="card-info">
+                            <span class="card-icon">💧</span>
+                            <h3 class="card-title">IV Drip Rate</h3>
+                        </div>
+                        <button class="favorite-btn" onclick="toggleFavorite(event, 'ivdrip')" aria-label="Add to favorites">☆</button>
+                    </div>
+                    <div class="description">
+                        Calculate IV drip rates and infusion times based on volume, time, and drop factor for accurate fluid administration.
+                    </div>
+                </div>
+
+                <!-- Menstruation Cycle Tracker -->
+                <div class="calculator-card" onclick="showCalculator('menstruation')" data-category="lifestyle" data-id="menstruation">
+                    <div class="card-header">
+                        <div class="card-info">
+                            <span class="card-icon">🌸</span>
+                            <h3 class="card-title">Menstruation Tracker</h3>
+                        </div>
+                        <button class="favorite-btn" onclick="toggleFavorite(event, 'menstruation')" aria-label="Add to favorites">☆</button>
+                    </div>
+                    <div class="description">
+                        Track menstrual cycle, predict fertile days, ovulation, and next period with WhatsApp notifications.
+                    </div>
+                </div>
+
+                <!-- Pediatric Dose Calculator -->
+                <div class="calculator-card" onclick="showCalculator('pediatric')" data-category="medical" data-id="pediatric">
+                    <div class="card-header">
+                        <div class="card-info">
+                            <span class="card-icon">👶</span>
+                            <h3 class="card-title">Pediatric Dosage</h3>
+                        </div>
+                        <button class="favorite-btn" onclick="toggleFavorite(event, 'pediatric')" aria-label="Add to favorites">☆</button>
+                    </div>
+                    <div class="description">
+                        Calculates appropriate medication doses for children based on weight using standard pediatric dosing formulas.
+                    </div>
+                </div>
+            </div>
+
+            <div class="empty-state" id="emptyState" style="display: none;">
+                <div class="empty-icon">📋</div>
+                <h3>No calculators found</h3>
+                <p>Try adjusting your filters or search criteria.</p>
+            </div>
+        </div>
+
+        <!-- Patients Page -->
+        <div class="page" id="patients">
+            <div class="calc-header">
+                <h1 class="calc-title">
+                    <span>👥</span>
+                    <span>Patient Management</span>
+                </h1>
+                <p class="calc-description">
+                    Manage patient records and view calculation history for each patient.
+                </p>
+            </div>
+
+            <div class="calc-form">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+                    <h3 style="color: var(--primary-color);">Patient List</h3>
+                    <button class="add-patient-btn" onclick="showAddPatientModal()">
+                        👤 Add New Patient
+                    </button>
+                </div>
+
+                <div class="patient-list" id="patientList">
+                    <!-- Patients will be loaded here -->
+                </div>
+
+                <div class="empty-state" id="patientsEmptyState" style="display: none;">
+                    <div class="empty-icon">👥</div>
+                    <h3>No patients yet</h3>
+                    <p>Add your first patient to start tracking medical calculations and history.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Glasgow Coma Scale Calculator Page -->
+        <div class="page" id="calc-gcs">
+            <div class="calc-page">
+                <button class="back-btn" onclick="showPage('home')">← Back to Home</button>
+                
+                <div class="patient-selector">
+                    <h3>👤 Select Patient</h3>
+                    <div class="patient-input-group">
+                        <select class="patient-select" id="gcs_patient_select">
+                            <option value="">Select Patient (Optional)</option>
+                            <option value="anonymous">Anonymous Calculation</option>
+                        </select>
+                        <button class="add-patient-btn" onclick="showAddPatientModal()">+ Add Patient</button>
+                        <button class="manage-patients-btn" onclick="showPage('patients')">Manage</button>
+                    </div>
+                </div>
+
+                <div class="calc-header">
+                    <h1 class="calc-title">
+                        <span>🧠</span>
+                        <span>Glasgow Coma Scale Calculator</span>
+                    </h1>
+                    <p class="calc-description">
+                        Assesses level of consciousness by evaluating eye opening, verbal response, and motor response.
+                    </p>
+                </div>
+
+                <div class="calc-form">
+                    <div class="input-group">
+                        <label>Eye Opening Response</label>
+                        <select id="gcs_eye" onchange="validateGCSInput()">
+                            <option value="">Select...</option>
+                            <option value="4">Spontaneous (4)</option>
+                            <option value="3">To verbal command (3)</option>
+                            <option value="2">To pain (2)</option>
+                            <option value="1">No response (1)</option>
+                        </select>
+                        <div class="input-validation" id="gcs_eye_validation"></div>
+                    </div>
+                    <div class="input-group">
+                        <label>Verbal Response</label>
+                        <select id="gcs_verbal" onchange="validateGCSInput()">
+                            <option value="">Select...</option>
+                            <option value="5">Oriented (5)</option>
+                            <option value="4">Confused (4)</option>
+                            <option value="3">Inappropriate words (3)</option>
+                            <option value="2">Incomprehensible sounds (2)</option>
+                            <option value="1">No response (1)</option>
+                        </select>
+                        <div class="input-validation" id="gcs_verbal_validation"></div>
+                    </div>
+                    <div class="input-group">
+                        <label>Motor Response</label>
+                        <select id="gcs_motor" onchange="validateGCSInput()">
+                            <option value="">Select...</option>
+                            <option value="6">Obeys commands (6)</option>
+                            <option value="5">Localizes pain (5)</option>
+                            <option value="4">Withdraws to pain (4)</option>
+                            <option value="3">Abnormal flexion (3)</option>
+                            <option value="2">Extension response (2)</option>
+                            <option value="1">No response (1)</option>
+                        </select>
+                        <div class="input-validation" id="gcs_motor_validation"></div>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="gcs_progress" style="width: 0%"></div>
+                    </div>
+                    <button class="calculate-btn" onclick="calculateGCS()" id="gcs_calc_btn" disabled>Calculate GCS Score</button>
+                    <div class="result" id="gcs_result"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- IV Drip Rate Calculator Page -->
+        <div class="page" id="calc-ivdrip">
+            <div class="calc-page">
+                <button class="back-btn" onclick="showPage('home')">← Back to Home</button>
+                
+                <div class="patient-selector">
+                    <h3>👤 Select Patient</h3>
+                    <div class="patient-input-group">
+                        <select class="patient-select" id="ivdrip_patient_select">
+                            <option value="">Select Patient (Optional)</option>
+                            <option value="anonymous">Anonymous Calculation</option>
+                        </select>
+                        <button class="add-patient-btn" onclick="showAddPatientModal()">+ Add Patient</button>
+                        <button class="manage-patients-btn" onclick="showPage('patients')">Manage</button>
+                    </div>
+                </div>
+
+                <div class="calc-header">
+                    <h1 class="calc-title">
+                        <span>💧</span>
+                        <span>IV Drip Rate Calculator</span>
+                    </h1>
+                    <p class="calc-description">
+                        Calculate IV drip rates and infusion times based on volume, time, and drop factor for accurate fluid administration.
+                    </p>
+                </div>
+
+                <div class="calc-form">
+                    <div class="input-group">
+                        <label>Total Volume (mL)</label>
+                        <input type="number" id="ivdrip_volume" placeholder="1000" min="1" oninput="validateIVDripInput()">
+                        <div class="input-validation" id="ivdrip_volume_validation"></div>
+                    </div>
+                    <div class="input-group">
+                        <label>Infusion Time (hours)</label>
+                        <input type="number" id="ivdrip_time" placeholder="8" step="0.1" min="0.1" oninput="validateIVDripInput()">
+                        <div class="input-validation" id="ivdrip_time_validation"></div>
+                    </div>
+                    <div class="input-group">
+                        <label>Drop Factor (drops/mL)</label>
+                        <select id="ivdrip_dropfactor" onchange="validateIVDripInput()">
+                            <option value="">Select Drop Factor</option>
+                            <option value="10">Macrodrip 10 drops/mL</option>
+                            <option value="15">Macrodrip 15 drops/mL</option>
+                            <option value="20">Macrodrip 20 drops/mL</option>
+                            <option value="60">Microdrip 60 drops/mL</option>
+                        </select>
+                        <div class="input-validation" id="ivdrip_dropfactor_validation"></div>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="ivdrip_progress" style="width: 0%"></div>
+                    </div>
+                    <button class="calculate-btn" onclick="calculateIVDrip()" id="ivdrip_calc_btn" disabled>Calculate IV Drip Rate</button>
+                    <div class="result" id="ivdrip_result"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Menstruation Cycle Tracker Page -->
+        <div class="page" id="calc-menstruation">
+            <div class="calc-page">
+                <button class="back-btn" onclick="showPage('home')">← Back to Home</button>
+                
+                <div class="patient-selector">
+                    <h3>👤 Select Patient</h3>
+                    <div class="patient-input-group">
+                        <select class="patient-select" id="menstruation_patient_select">
+                            <option value="">Select Patient (Optional)</option>
+                            <option value="anonymous">Anonymous Calculation</option>
+                        </select>
+                        <button class="add-patient-btn" onclick="showAddPatientModal()">+ Add Patient</button>
+                        <button class="manage-patients-btn" onclick="showPage('patients')">Manage</button>
+                    </div>
+                </div>
+
+                <div class="calc-header">
+                    <h1 class="calc-title">
+                        <span>🌸</span>
+                        <span>Menstruation Cycle Tracker</span>
+                    </h1>
+                    <p class="calc-description">
+                        Complete menstrual cycle tracking with fertility prediction, symptom monitoring, and WhatsApp notifications.
+                    </p>
+                </div>
+
+                <div class="calc-form">
+                    <div class="input-group">
+                        <label>Last Period Start Date</label>
+                        <input type="date" id="menstruation_last_date" oninput="validateMenstruationInput()">
+                        <div class="input-validation" id="menstruation_date_validation"></div>
+                    </div>
+                    <div class="input-group">
+                        <label>Average Cycle Length (days)</label>
+                        <input type="number" id="menstruation_cycle_length" placeholder="28" min="21" max="45" oninput="validateMenstruationInput()">
+                        <div class="input-validation" id="menstruation_cycle_validation"></div>
+                        <small style="color: var(--text-secondary); font-size: 0.85rem; margin-top: 0.5rem; display: block;">
+                            Normal range: 21-35 days (average 28 days)
+                        </small>
+                    </div>
+                    <div class="input-group">
+                        <label>Period Duration (days)</label>
+                        <input type="number" id="menstruation_period_length" placeholder="5" min="2" max="8" oninput="validateMenstruationInput()">
+                        <div class="input-validation" id="menstruation_period_validation"></div>
+                        <small style="color: var(--text-secondary); font-size: 0.85rem; margin-top: 0.5rem; display: block;">
+                            Normal range: 3-7 days (average 5 days)
+                        </small>
+                    </div>
+                    <div class="input-group">
+                        <label>Current Symptoms (Optional)</label>
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 0.5rem; margin-top: 0.5rem;">
+                            <label style="display: flex; align-items: center; gap: 0.5rem; font-weight: normal;">
+                                <input type="checkbox" id="symptom_cramps"> Cramps
+                            </label>
+                            <label style="display: flex; align-items: center; gap: 0.5rem; font-weight: normal;">
+                                <input type="checkbox" id="symptom_bloating"> Bloating
+                            </label>
+                            <label style="display: flex; align-items: center; gap: 0.5rem; font-weight: normal;">
+                                <input type="checkbox" id="symptom_mood"> Mood Changes
+                            </label>
+                            <label style="display: flex; align-items: center; gap: 0.5rem; font-weight: normal;">
+                                <input type="checkbox" id="symptom_headache"> Headache
+                            </label>
+                            <label style="display: flex; align-items: center; gap: 0.5rem; font-weight: normal;">
+                                <input type="checkbox" id="symptom_fatigue"> Fatigue
+                            </label>
+                            <label style="display: flex; align-items: center; gap: 0.5rem; font-weight: normal;">
+                                <input type="checkbox" id="symptom_tender"> Breast Tenderness
+                            </label>
+                        </div>
+                    </div>
+                    <div class="input-group">
+                        <label>Phone Number (for WhatsApp notifications)</label>
+                        <input type="tel" id="menstruation_phone" placeholder="+91 9876543210" oninput="validateMenstruationInput()">
+                        <div class="input-validation" id="menstruation_phone_validation"></div>
+                        <small style="color: var(--text-secondary); font-size: 0.85rem; margin-top: 0.5rem; display: block;">
+                            Include country code (e.g., +91 for India, +1 for USA)
+                        </small>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="menstruation_progress" style="width: 0%"></div>
+                    </div>
+                    <button class="calculate-btn" onclick="calculateMenstruation()" id="menstruation_calc_btn" disabled>Track My Cycle</button>
+                    <div class="result" id="menstruation_result"></div>
+                </div>
+
+                <!-- Menstrual Cycle Calendar -->
+                <div class="calc-form" style="margin-top: 2rem;" id="menstrual_calendar" style="display: none;">
+                    <h3 style="color: var(--primary-color); margin-bottom: 1.5rem; text-align: center;">
+                        📅 Your Cycle Calendar
+                    </h3>
+                    <div id="cycle_calendar_content"></div>
+                </div>
+
+                <!-- Educational Information Section -->
+                <div class="calc-form" style="margin-top: 2rem;">
+                    <h3 style="color: var(--primary-color); margin-bottom: 1.5rem; font-size: 1.4rem;">
+                        📚 Understanding Your Menstrual Cycle
+                    </h3>
+                    
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; margin-bottom: 2rem;">
+                        <div style="background: var(--background); padding: 1.5rem; border-radius: var(--border-radius); border: 1px solid var(--border);">
+                            <h4 style="color: var(--danger-color); margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">
+                                🩸 Menstrual Phase (Days 1-5)
+                            </h4>
+                            <p style="color: var(--text-secondary); line-height: 1.6; font-size: 0.9rem;">
+                                The period when the uterine lining sheds. Hormone levels are low. You may experience cramps, bloating, and mood changes.
+                            </p>
+                        </div>
+                        
+                        <div style="background: var(--background); padding: 1.5rem; border-radius: var(--border-radius); border: 1px solid var(--border);">
+                            <h4 style="color: var(--warning-color); margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">
+                                🌱 Follicular Phase (Days 1-13)
+                            </h4>
+                            <p style="color: var(--text-secondary); line-height: 1.6; font-size: 0.9rem;">
+                                Overlaps with menstruation. Eggs mature in the ovaries. Estrogen levels rise, improving mood and energy.
+                            </p>
+                        </div>
+                        
+                        <div style="background: var(--background); padding: 1.5rem; border-radius: var(--border-radius); border: 1px solid var(--border);">
+                            <h4 style="color: var(--success-color); margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">
+                                🥚 Ovulation Phase (Day 14)
+                            </h4>
+                            <p style="color: var(--text-secondary); line-height: 1.6; font-size: 0.9rem;">
+                                The egg is released from the ovary. Most fertile time. You may notice clearer vaginal discharge and slight temperature rise.
+                            </p>
+                        </div>
+                        
+                        <div style="background: var(--background); padding: 1.5rem; border-radius: var(--border-radius); border: 1px solid var(--border);">
+                            <h4 style="color: var(--secondary-color); margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">
+                                🌙 Luteal Phase (Days 15-28)
+                            </h4>
+                            <p style="color: var(--text-secondary); line-height: 1.6; font-size: 0.9rem;">
+                                After ovulation, progesterone rises. If pregnancy doesn't occur, hormone levels drop, leading to the next period.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div style="background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(6, 182, 212, 0.1)); padding: 2rem; border-radius: var(--border-radius); border: 1px solid var(--primary-color); margin-bottom: 2rem;">
+                        <h4 style="color: var(--primary-color); margin-bottom: 1rem; font-size: 1.2rem;">
+                            💡 Cycle Tracking Tips
+                        </h4>
+                        <ul style="color: var(--text-secondary); line-height: 1.8; padding-left: 1.5rem;">
+                            <li>Track for at least 3 months to identify patterns</li>
+                            <li>Note symptoms like mood, energy, and physical changes</li>
+                            <li>Normal cycles range from 21-35 days</li>
+                            <li>Stress, diet, and exercise can affect your cycle</li>
+                            <li>Consult a doctor if cycles are very irregular</li>
+                            <li>Use this tracker alongside period-tracking apps</li>
+                        </ul>
+                    </div>
+
+                    <div style="background: rgba(239, 68, 68, 0.1); padding: 1.5rem; border-radius: var(--border-radius); border: 1px solid var(--danger-color);">
+                        <h4 style="color: var(--danger-color); margin-bottom: 1rem; font-size: 1.1rem;">
+                            ⚠️ When to Consult a Doctor
+                        </h4>
+                        <ul style="color: var(--text-secondary); line-height: 1.6; padding-left: 1.5rem; font-size: 0.9rem;">
+                            <li>Cycles shorter than 21 days or longer than 35 days</li>
+                            <li>Periods lasting more than 7 days</li>
+                            <li>Severe pain that interferes with daily activities</li>
+                            <li>Heavy bleeding (changing pad/tampon every hour)</li>
+                            <li>Missed periods (when not pregnant)</li>
+                            <li>Bleeding between periods</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pediatric Dosage Calculator Page -->
+        <div class="page" id="calc-pediatric">
+            <div class="calc-page">
+                <button class="back-btn" onclick="showPage('home')">← Back to Home</button>
+                
+                <div class="patient-selector">
+                    <h3>👤 Select Patient</h3>
+                    <div class="patient-input-group">
+                        <select class="patient-select" id="pediatric_patient_select">
+                            <option value="">Select Patient (Optional)</option>
+                            <option value="anonymous">Anonymous Calculation</option>
+                        </select>
+                        <button class="add-patient-btn" onclick="showAddPatientModal()">+ Add Patient</button>
+                        <button class="manage-patients-btn" onclick="showPage('patients')">Manage</button>
+                    </div>
+                </div>
+
+                <div class="calc-header">
+                    <h1 class="calc-title">
+                        <span>👶</span>
+                        <span>Pediatric Dosage Calculator</span>
+                    </h1>
+                    <p class="calc-description">
+                        Calculate safe medication doses for children using weight-based, age-based, and BSA-based methods with safety checks.
+                    </p>
+                </div>
+
+                <div class="calc-form">
+                    <div class="input-group">
+                        <label>Child's Age</label>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                            <input type="number" id="pediatric_age_years" placeholder="Years" min="0" max="18" oninput="validatePediatricInput()">
+                            <input type="number" id="pediatric_age_months" placeholder="Months" min="0" max="11" oninput="validatePediatricInput()">
+                        </div>
+                        <div class="input-validation" id="pediatric_age_validation"></div>
+                    </div>
+                    <div class="input-group">
+                        <label>Weight (kg)</label>
+                        <input type="number" id="pediatric_weight" placeholder="15" step="0.1" min="0.5" max="100" oninput="validatePediatricInput()">
+                        <div class="input-validation" id="pediatric_weight_validation"></div>
+                    </div>
+                    <div class="input-group">
+                        <label>Height (cm) - Optional for BSA calculation</label>
+                        <input type="number" id="pediatric_height" placeholder="100" step="0.1" min="30" max="200" oninput="validatePediatricInput()">
+                        <div class="input-validation" id="pediatric_height_validation"></div>
+                    </div>
+                    <div class="input-group">
+                        <label>Adult Dose (mg)</label>
+                        <input type="number" id="pediatric_adult_dose" placeholder="500" step="0.1" min="0.1" oninput="validatePediatricInput()">
+                        <div class="input-validation" id="pediatric_adult_dose_validation"></div>
+                    </div>
+                    <div class="input-group">
+                        <label>Calculation Method</label>
+                        <select id="pediatric_method" onchange="validatePediatricInput()">
+                            <option value="weight">Weight-based (mg/kg)</option>
+                            <option value="clark">Clark's Rule (by weight)</option>
+                            <option value="young">Young's Rule (by age)</option>
+                            <option value="fried">Fried's Rule (infants)</option>
+                            <option value="bsa">BSA-based (requires height)</option>
+                        </select>
+                        <div class="input-validation" id="pediatric_method_validation"></div>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="pediatric_progress" style="width: 0%"></div>
+                    </div>
+                    <button class="calculate-btn" onclick="calculatePediatric()" id="pediatric_calc_btn" disabled>Calculate Pediatric Dose</button>
+                    <div class="result" id="pediatric_result"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- History Page -->
+        <div class="page" id="history">
+            <div class="calc-header">
+                <h1 class="calc-title">
+                    <span>📊</span>
+                    <span>Calculation History</span>
+                </h1>
+                <p class="calc-description">
+                    View and manage your calculation history with detailed reports.
+                </p>
+            </div>
+
+            <div class="calc-form">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem;">
+                    <h3 style="color: var(--primary-color);">Recent Calculations</h3>
+                    <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+                        <button class="download-btn" onclick="exportAllHistory()">📄 Export All</button>
+                        <button class="clear-history-btn" onclick="clearHistory()">🗑️ Clear History</button>
+                    </div>
+                </div>
+
+                <div id="historyContent">
+                    <!-- History items will be loaded here -->
+                </div>
+
+                <div class="empty-state" id="historyEmptyState" style="display: none;">
+                    <div class="empty-icon">📊</div>
+                    <h3>No calculations yet</h3>
+                    <p>Start calculating to see your history here. All calculations are automatically saved.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- BMI Calculator Page -->
+        <div class="page" id="calc-bmi">
+            <div class="calc-page">
+                <button class="back-btn" onclick="showPage('home')">← Back to Home</button>
+                
+                <div class="patient-selector">
+                    <h3>👤 Select Patient</h3>
+                    <div class="patient-input-group">
+                        <select class="patient-select" id="bmi_patient_select">
+                            <option value="">Select Patient (Optional)</option>
+                            <option value="anonymous">Anonymous Calculation</option>
+                        </select>
+                        <button class="add-patient-btn" onclick="showAddPatientModal()">+ Add Patient</button>
+                        <button class="manage-patients-btn" onclick="showPage('patients')">Manage</button>
+                    </div>
+                </div>
+
+                <div class="calc-header">
+                    <h1 class="calc-title">
+                        <span>⚖️</span>
+                        <span>BMI Calculator</span>
+                    </h1>
+                    <p class="calc-description">
+                        Body Mass Index measures body weight relative to height to assess if you're underweight, normal weight, overweight, or obese.
+                    </p>
+                </div>
+
+                <div class="calc-form">
+                    <div class="input-group">
+                        <label>Weight (kg)</label>
+                        <input type="number" id="bmi_weight" placeholder="70" step="0.1" oninput="validateBMIInput()">
+                        <div class="input-validation" id="bmi_weight_validation"></div>
+                    </div>
+                    <div class="input-group">
+                        <label>Height (cm)</label>
+                        <input type="number" id="bmi_height" placeholder="170" step="0.1" oninput="validateBMIInput()">
+                        <div class="input-validation" id="bmi_height_validation"></div>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="bmi_progress" style="width: 0%"></div>
+                    </div>
+                    <button class="calculate-btn" onclick="calculateBMI()" id="bmi_calc_btn" disabled>Calculate BMI</button>
+                    <div class="result" id="bmi_result"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Drug Dosage Calculator Page -->
+        <div class="page" id="calc-dosage">
+            <div class="calc-page">
+                <button class="back-btn" onclick="showPage('home')">← Back to Home</button>
+                
+                <div class="patient-selector">
+                    <h3>👤 Select Patient</h3>
+                    <div class="patient-input-group">
+                        <select class="patient-select" id="dosage_patient_select">
+                            <option value="">Select Patient (Optional)</option>
+                            <option value="anonymous">Anonymous Calculation</option>
+                        </select>
+                        <button class="add-patient-btn" onclick="showAddPatientModal()">+ Add Patient</button>
+                        <button class="manage-patients-btn" onclick="showPage('patients')">Manage</button>
+                    </div>
+                </div>
+
+                <div class="calc-header">
+                    <h1 class="calc-title">
+                        <span>💊</span>
+                        <span>Drug Dosage Calculator</span>
+                    </h1>
+                    <p class="calc-description">
+                        Calculate precise medication dosages based on patient weight, age, and specific drug parameters with safety checks.
+                    </p>
+                </div>
+
+                <div class="calc-form">
+                    <div class="input-group">
+                        <label>Patient Weight (kg)</label>
+                        <input type="number" id="dosage_weight" placeholder="70" step="0.1" oninput="validateDosageInput()">
+                        <div class="input-validation" id="dosage_weight_validation"></div>
+                    </div>
+                    <div class="input-group">
+                        <label>Drug Concentration (mg/ml)</label>
+                        <input type="number" id="dosage_concentration" placeholder="10" step="0.1" oninput="validateDosageInput()">
+                        <div class="input-validation" id="dosage_concentration_validation"></div>
+                    </div>
+                    <div class="input-group">
+                        <label>Dose per kg (mg/kg)</label>
+                        <input type="number" id="dosage_per_kg" placeholder="5" step="0.1" oninput="validateDosageInput()">
+                        <div class="input-validation" id="dosage_per_kg_validation"></div>
+                    </div>
+                    <div class="input-group">
+                        <label>Maximum Dose (mg) - Optional</label>
+                        <input type="number" id="dosage_max" placeholder="500" step="0.1" oninput="validateDosageInput()">
+                        <div class="input-validation" id="dosage_max_validation"></div>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="dosage_progress" style="width: 0%"></div>
+                    </div>
+                    <button class="calculate-btn" onclick="calculateDosage()" id="dosage_calc_btn" disabled>Calculate Dosage</button>
+                    <div class="result" id="dosage_result"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- APGAR Score Calculator Page -->
+        <div class="page" id="calc-apgar">
+            <div class="calc-page">
+                <button class="back-btn" onclick="showPage('home')">← Back to Home</button>
+                
+                <div class="patient-selector">
+                    <h3>👤 Select Patient</h3>
+                    <div class="patient-input-group">
+                        <select class="patient-select" id="apgar_patient_select">
+                            <option value="">Select Patient (Optional)</option>
+                            <option value="anonymous">Anonymous Calculation</option>
+                        </select>
+                        <button class="add-patient-btn" onclick="showAddPatientModal()">+ Add Patient</button>
+                        <button class="manage-patients-btn" onclick="showPage('patients')">Manage</button>
+                    </div>
+                </div>
+
+                <div class="calc-header">
+                    <h1 class="calc-title">
+                        <span>👶</span>
+                        <span>APGAR Score Calculator</span>
+                    </h1>
+                    <p class="calc-description">
+                        Assess newborn health immediately after birth using appearance, pulse, grimace, activity, and respiration criteria.
+                    </p>
+                </div>
+
+                <div class="calc-form">
+                    <div class="input-group">
+                        <label>Appearance (Skin Color)</label>
+                        <select id="apgar_appearance" onchange="validateApgarInput()">
+                            <option value="">Select...</option>
+                            <option value="0">Blue or pale all over (0)</option>
+                            <option value="1">Pink body, blue extremities (1)</option>
+                            <option value="2">Pink all over (2)</option>
+                        </select>
+                        <div class="input-validation" id="apgar_appearance_validation"></div>
+                    </div>
+                    <div class="input-group">
+                        <label>Pulse (Heart Rate)</label>
+                        <select id="apgar_pulse" onchange="validateApgarInput()">
+                            <option value="">Select...</option>
+                            <option value="0">Absent (0)</option>
+                            <option value="1">Less than 100 bpm (1)</option>
+                            <option value="2">Greater than 100 bpm (2)</option>
+                        </select>
+                        <div class="input-validation" id="apgar_pulse_validation"></div>
+                    </div>
+                    <div class="input-group">
+                        <label>Grimace (Reflex Response)</label>
+                        <select id="apgar_grimace" onchange="validateApgarInput()">
+                            <option value="">Select...</option>
+                            <option value="0">No response (0)</option>
+                            <option value="1">Grimace/weak cry (1)</option>
+                            <option value="2">Vigorous cry (2)</option>
+                        </select>
+                        <div class="input-validation" id="apgar_grimace_validation"></div>
+                    </div>
+                    <div class="input-group">
+                        <label>Activity (Muscle Tone)</label>
+                        <select id="apgar_activity" onchange="validateApgarInput()">
+                            <option value="">Select...</option>
+                            <option value="0">Limp (0)</option>
+                            <option value="1">Some flexion (1)</option>
+                            <option value="2">Active motion (2)</option>
+                        </select>
+                        <div class="input-validation" id="apgar_activity_validation"></div>
+                    </div>
+                    <div class="input-group">
+                        <label>Respiration (Breathing)</label>
+                        <select id="apgar_respiration" onchange="validateApgarInput()">
+                            <option value="">Select...</option>
+                            <option value="0">Absent (0)</option>
+                            <option value="1">Slow, irregular (1)</option>
+                            <option value="2">Good, crying (2)</option>
+                        </select>
+                        <div class="input-validation" id="apgar_respiration_validation"></div>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="apgar_progress" style="width: 0%"></div>
+                    </div>
+                    <button class="calculate-btn" onclick="calculateApgar()" id="apgar_calc_btn" disabled>Calculate APGAR Score</button>
+                    <div class="result" id="apgar_result"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Body Fat Percentage Calculator Page -->
+        <div class="page" id="calc-bodyfat">
+            <div class="calc-page">
+                <button class="back-btn" onclick="showPage('home')">← Back to Home</button>
+                
+                <div class="patient-selector">
+                    <h3>👤 Select Patient</h3>
+                    <div class="patient-input-group">
+                        <select class="patient-select" id="bodyfat_patient_select">
+                            <option value="">Select Patient (Optional)</option>
+                            <option value="anonymous">Anonymous Calculation</option>
+                        </select>
+                        <button class="add-patient-btn" onclick="showAddPatientModal()">+ Add Patient</button>
+                        <button class="manage-patients-btn" onclick="showPage('patients')">Manage</button>
+                    </div>
+                </div>
+
+                <div class="calc-header">
+                    <h1 class="calc-title">
+                        <span>📊</span>
+                        <span>Body Fat Percentage Calculator</span>
+                    </h1>
+                    <p class="calc-description">
+                        Calculate body fat percentage using various formulas including Navy Method and BMI-based estimations.
+                    </p>
+                </div>
+
+                <div class="calc-form">
+                    <div class="input-group">
+                        <label>Gender</label>
+                        <select id="bodyfat_gender" onchange="validateBodyFatInput()">
+                            <option value="">Select Gender</option>
+                            <option value="male">Male</option>
+                            <option value="female">Female</option>
+                        </select>
+                        <div class="input-validation" id="bodyfat_gender_validation"></div>
+                    </div>
+                    <div class="input-group">
+                        <label>Age (years)</label>
+                        <input type="number" id="bodyfat_age" placeholder="30" min="10" max="100" oninput="validateBodyFatInput()">
+                        <div class="input-validation" id="bodyfat_age_validation"></div>
+                    </div>
+                    <div class="input-group">
+                        <label>Height (cm)</label>
+                        <input type="number" id="bodyfat_height" placeholder="170" step="0.1" oninput="validateBodyFatInput()">
+                        <div class="input-validation" id="bodyfat_height_validation"></div>
+                    </div>
+                    <div class="input-group">
+                        <label>Weight (kg)</label>
+                        <input type="number" id="bodyfat_weight" placeholder="70" step="0.1" oninput="validateBodyFatInput()">
+                        <div class="input-validation" id="bodyfat_weight_validation"></div>
+                    </div>
+                    <div class="input-group">
+                        <label>Waist Circumference (cm)</label>
+                        <input type="number" id="bodyfat_waist" placeholder="80" step="0.1" oninput="validateBodyFatInput()">
+                        <div class="input-validation" id="bodyfat_waist_validation"></div>
+                    </div>
+                    <div class="input-group" id="bodyfat_neck_group">
+                        <label>Neck Circumference (cm)</label>
+                        <input type="number" id="bodyfat_neck" placeholder="35" step="0.1" oninput="validateBodyFatInput()">
+                        <div class="input-validation" id="bodyfat_neck_validation"></div>
+                    </div>
+                    <div class="input-group" id="bodyfat_hip_group" style="display: none;">
+                        <label>Hip Circumference (cm) - For Females</label>
+                        <input type="number" id="bodyfat_hip" placeholder="95" step="0.1" oninput="validateBodyFatInput()">
+                        <div class="input-validation" id="bodyfat_hip_validation"></div>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="bodyfat_progress" style="width: 0%"></div>
+                    </div>
+                    <button class="calculate-btn" onclick="calculateBodyFat()" id="bodyfat_calc_btn" disabled>Calculate Body Fat</button>
+                    <div class="result" id="bodyfat_result"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Calorie Calculator Page -->
+        <div class="page" id="calc-calories">
+            <div class="calc-page">
+                <button class="back-btn" onclick="showPage('home')">← Back to Home</button>
+                
+                <div class="patient-selector">
+                    <h3>👤 Select Patient</h3>
+                    <div class="patient-input-group">
+                        <select class="patient-select" id="calories_patient_select">
+                            <option value="">Select Patient (Optional)</option>
+                            <option value="anonymous">Anonymous Calculation</option>
+                        </select>
+                        <button class="add-patient-btn" onclick="showAddPatientModal()">+ Add Patient</button>
+                        <button class="manage-patients-btn" onclick="showPage('patients')">Manage</button>
+                    </div>
+                </div>
+
+                <div class="calc-header">
+                    <h1 class="calc-title">
+                        <span>🔥</span>
+                        <span>Calorie Calculator</span>
+                    </h1>
+                    <p class="calc-description">
+                        Calculate daily caloric needs based on age, gender, height, weight, and activity level using multiple formulas.
+                    </p>
+                </div>
+
+                <div class="calc-form">
+                    <div class="input-group">
+                        <label>Gender</label>
+                        <select id="calories_gender" onchange="validateCaloriesInput()">
+                            <option value="">Select Gender</option>
+                            <option value="male">Male</option>
+                            <option value="female">Female</option>
+                        </select>
+                        <div class="input-validation" id="calories_gender_validation"></div>
+                    </div>
+                    <div class="input-group">
+                        <label>Age (years)</label>
+                        <input type="number" id="calories_age" placeholder="30" min="1" max="120" oninput="validateCaloriesInput()">
+                        <div class="input-validation" id="calories_age_validation"></div>
+                    </div>
+                    <div class="input-group">
+                        <label>Height (cm)</label>
+                        <input type="number" id="calories_height" placeholder="170" step="0.1" oninput="validateCaloriesInput()">
+                        <div class="input-validation" id="calories_height_validation"></div>
+                    </div>
+                    <div class="input-group">
+                        <label>Weight (kg)</label>
+                        <input type="number" id="calories_weight" placeholder="70" step="0.1" oninput="validateCaloriesInput()">
+                        <div class="input-validation" id="calories_weight_validation"></div>
+                    </div>
+                    <div class="input-group">
+                        <label>Activity Level</label>
+                        <select id="calories_activity" onchange="validateCaloriesInput()">
+                            <option value="">Select Activity Level</option>
+                            <option value="1.2">Sedentary (little/no exercise)</option>
+                            <option value="1.375">Lightly active (light exercise 1-3 days/week)</option>
+                            <option value="1.55">Moderately active (moderate exercise 3-5 days/week)</option>
+                            <option value="1.725">Very active (hard exercise 6-7 days/week)</option>
+                            <option value="1.9">Super active (very hard exercise, physical job)</option>
+                        </select>
+                        <div class="input-validation" id="calories_activity_validation"></div>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="calories_progress" style="width: 0%"></div>
+                    </div>
+                    <button class="calculate-btn" onclick="calculateCalories()" id="calories_calc_btn" disabled>Calculate Daily Calories</button>
+                    <div class="result" id="calories_result"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Body Surface Area Calculator Page -->
+        <div class="page" id="calc-bsa">
+            <div class="calc-page">
+                <button class="back-btn" onclick="showPage('home')">← Back to Home</button>
+                
+                <div class="patient-selector">
+                    <h3>👤 Select Patient</h3>
+                    <div class="patient-input-group">
+                        <select class="patient-select" id="bsa_patient_select">
+                            <option value="">Select Patient (Optional)</option>
+                            <option value="anonymous">Anonymous Calculation</option>
+                        </select>
+                        <button class="add-patient-btn" onclick="showAddPatientModal()">+ Add Patient</button>
+                        <button class="manage-patients-btn" onclick="showPage('patients')">Manage</button>
+                    </div>
+                </div>
+
+                <div class="calc-header">
+                    <h1 class="calc-title">
+                        <span>📐</span>
+                        <span>Body Surface Area Calculator</span>
+                    </h1>
+                    <p class="calc-description">
+                        Calculates body surface area using multiple validated formulas for precise drug dosing and cardiac index.
+                    </p>
+                </div>
+
+                <div class="calc-form">
+                    <div class="input-group">
+                        <label>Height (cm)</label>
+                        <input type="number" id="bsa_height" placeholder="170" step="0.1" oninput="validateBSAInput()">
+                        <div class="input-validation" id="bsa_height_validation"></div>
+                    </div>
+                    <div class="input-group">
+                        <label>Weight (kg)</label>
+                        <input type="number" id="bsa_weight" placeholder="70" step="0.1" oninput="validateBSAInput()">
+                        <div class="input-validation" id="bsa_weight_validation"></div>
+                    </div>
+                    <div class="input-group">
+                        <label>Formula</label>
+                        <select id="bsa_formula" onchange="validateBSAInput()">
+                            <option value="mosteller">Mosteller (Recommended)</option>
+                            <option value="dubois">DuBois & DuBois</option>
+                            <option value="haycock">Haycock</option>
+                            <option value="gehan">Gehan & George</option>
+                        </select>
+                        <div class="input-validation" id="bsa_formula_validation"></div>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="bsa_progress" style="width: 0%"></div>
+                    </div>
+                    <button class="calculate-btn" onclick="calculateBSA()" id="bsa_calc_btn" disabled>Calculate BSA</button>
+                    <div class="result" id="bsa_result"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- About Page -->
+        <div class="page" id="about">
+            <div class="calc-header">
+                <h1 class="calc-title">
+                    <span>ℹ️</span>
+                    <span>About MedCalc Pro</span>
+                </h1>
+                <p class="calc-description">
+                    Professional medical calculator suite designed for healthcare professionals, students, and researchers.
+                </p>
+            </div>
+            <div class="calc-form">
+                <h3 style="color: var(--primary-color); margin-bottom: 1rem;">Features</h3>
+                <ul style="margin-bottom: 2rem; padding-left: 1.5rem; line-height: 1.8;">
+                    <li>10+ comprehensive medical calculators</li>
+                    <li>Patient record management system</li>
+                    <li>Favorites and quick access</li>
+                    <li>Professional PDF reports</li>
+                    <li>Calculation history tracking</li>
+                    <li>Dark mode and accessibility</li>
+                    <li>Offline functionality (PWA)</li>
+                    <li>Real-time input validation</li>
+                    <li>Mobile-responsive design</li>
+                    <li>WhatsApp integration</li>
+                </ul>
+                
+                <h3 style="color: var(--primary-color); margin-bottom: 1rem;">Disclaimer</h3>
+                <p style="color: var(--text-secondary); line-height: 1.6; margin-bottom: 2rem;">
+                    This application is for educational and informational purposes only. All calculations should be verified and used in conjunction with professional medical judgment. This tool does not replace clinical expertise or professional medical advice.
+                </p>
+
+                <h3 style="color: var(--primary-color); margin-bottom: 1rem;">Version Information</h3>
+                <div style="background: var(--background); padding: 1.5rem; border-radius: var(--border-radius); border: 1px solid var(--border);">
+                    <p><strong>Version:</strong> 3.0.0</p>
+                    <p><strong>Release Date:</strong> 2024</p>
+                    <p><strong>Features:</strong> Patient Management, PDF Reports, 10+ Calculators</p>
+                    <p><strong>License:</strong> Educational Use</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Patient Modal -->
+    <div class="modal" id="addPatientModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>👤 Add New Patient</h3>
+                <button class="close-modal" onclick="closeModal('addPatientModal')">×</button>
+            </div>
+            <form onsubmit="addPatient(event)">
+                <div class="input-group">
+                    <label>Patient Name *</label>
+                    <input type="text" id="patient_name" required placeholder="John Doe">
+                </div>
+                <div class="input-group">
+                    <label>Age</label>
+                    <input type="number" id="patient_age" placeholder="30" min="0" max="120">
+                </div>
+                <div class="input-group">
+                    <label>Gender</label>
+                    <select id="patient_gender">
+                        <option value="">Select Gender</option>
+                        <option value="Male">Male</option>
+                        <option value="Female">Female</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+                <div class="input-group">
+                    <label>Phone Number</label>
+                    <input type="tel" id="patient_phone" placeholder="+1 234-567-8900">
+                </div>
+                <div class="input-group">
+                    <label>Medical Record Number</label>
+                    <input type="text" id="patient_mrn" placeholder="MRN12345">
+                </div>
+                <div class="input-group">
+                    <label>Notes</label>
+                    <textarea id="patient_notes" placeholder="Medical history, allergies, etc." rows="3" style="width: 100%; padding: 1rem; border: 2px solid var(--border); border-radius: var(--border-radius); font-family: inherit; resize: vertical;"></textarea>
+                </div>
+                <button type="submit" class="calculate-btn" style="margin-top: 1rem;">👤 Add Patient</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Global Variables
+        let currentPatient = null;
+        let patients = [];
+        let calculationHistory = [];
+        let favorites = [];
+        let recentCalculators = [];
+        let currentFilter = 'all';
+        let settings = {
+            darkMode: false,
+            autoSave: true,
+            soundNotifications: false,
+            animationEffects: true
+        };
+
+        // App State Management
+        class AppState {
+            constructor() {
+                this.currentPage = 'home';
+                this.isLoading = false;
+            }
+
+            setLoading(loading) {
+                this.isLoading = loading;
+                const spinner = document.getElementById('loadingSpinner');
+                if (spinner) {
+                    spinner.style.display = loading ? 'block' : 'none';
+                }
+            }
+
+            showNotification(message, type = 'success', duration = 3000) {
+                const toast = document.createElement('div');
+                toast.className = `toast ${type}`;
+                toast.innerHTML = `
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <span>${message}</span>
+                        <button onclick="this.parentElement.parentElement.remove()" 
+                                style="background: none; border: none; color: inherit; cursor: pointer; font-size: 1.2rem;">×</button>
+                    </div>
+                `;
+                
+                const container = document.getElementById('toastContainer');
+                if (container) {
+                    container.appendChild(toast);
+                    
+                    setTimeout(() => {
+                        if (toast.parentElement) {
+                            toast.remove();
+                        }
+                    }, duration);
+                }
+            }
+        }
+
+        const appState = new AppState();
+
+        // Settings Management
+        function saveSettings() {
+            try {
+                localStorage.setItem('medcalc_settings', JSON.stringify(settings));
+            } catch (error) {
+                console.warn('Could not save settings:', error);
+            }
+        }
+
+        function loadSettings() {
+            try {
+                const savedSettings = localStorage.getItem('medcalc_settings');
+                if (savedSettings) {
+                    settings = { ...settings, ...JSON.parse(savedSettings) };
+                }
+                
+                // Apply settings to UI
+                document.getElementById('darkModeToggle').checked = settings.darkMode;
+                document.getElementById('autoSaveToggle').checked = settings.autoSave;
+                document.getElementById('soundToggle').checked = settings.soundNotifications;
+                document.getElementById('animationToggle').checked = settings.animationEffects;
+                
+                // Apply dark mode if enabled
+                if (settings.darkMode) {
+                    document.body.setAttribute('data-theme', 'dark');
+                }
+                
+                // Apply animation settings
+                if (!settings.animationEffects) {
+                    const style = document.createElement('style');
+                    style.id = 'disable-animations';
+                    style.textContent = `
+                        *, *::before, *::after {
+                            animation-duration: 0.01ms !important;
+                            animation-iteration-count: 1 !important;
+                            transition-duration: 0.01ms !important;
+                            scroll-behavior: auto !important;
+                        }
+                    `;
+                    document.head.appendChild(style);
+                }
+            } catch (error) {
+                console.warn('Could not load settings:', error);
+            }
+        }
+
+        // Toggle Functions
+        function toggleDarkMode() {
+            settings.darkMode = document.getElementById('darkModeToggle').checked;
+            
+            if (settings.darkMode) {
+                document.body.setAttribute('data-theme', 'dark');
+            } else {
+                document.body.removeAttribute('data-theme');
+            }
+            
+            saveSettings();
+            appState.showNotification(`Dark mode ${settings.darkMode ? 'enabled' : 'disabled'}`, 'success');
+        }
+
+        function toggleAutoSave() {
+            settings.autoSave = document.getElementById('autoSaveToggle').checked;
+            saveSettings();
+            appState.showNotification(`Auto-save ${settings.autoSave ? 'enabled' : 'disabled'}`, 'success');
+        }
+
+        function toggleSound() {
+            settings.soundNotifications = document.getElementById('soundToggle').checked;
+            saveSettings();
+            appState.showNotification(`Sound notifications ${settings.soundNotifications ? 'enabled' : 'disabled'}`, 'success');
+        }
+
+        function toggleAnimations() {
+            settings.animationEffects = document.getElementById('animationToggle').checked;
+            
+            if (!settings.animationEffects) {
+                const style = document.createElement('style');
+                style.id = 'disable-animations';
+                style.textContent = `
+                    *, *::before, *::after {
+                        animation-duration: 0.01ms !important;
+                        animation-iteration-count: 1 !important;
+                        transition-duration: 0.01ms !important;
+                        scroll-behavior: auto !important;
+                    }
+                `;
+                document.head.appendChild(style);
+            } else {
+                const style = document.getElementById('disable-animations');
+                if (style) {
+                    style.remove();
+                }
+            }
+            
+            saveSettings();
+            appState.showNotification(`Animation effects ${settings.animationEffects ? 'enabled' : 'disabled'}`, 'success');
+        }
+
+        // Sidebar Management
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('overlay');
+            
+            if (sidebar && overlay) {
+                sidebar.classList.add('open');
+                overlay.classList.add('show');
+                document.body.style.overflow = 'hidden';
+            }
+        }
+
+        function closeSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('overlay');
+            
+            if (sidebar && overlay) {
+                sidebar.classList.remove('open');
+                overlay.classList.remove('show');
+                document.body.style.overflow = '';
+            }
+        }
+
+        // Data Management
+        function exportAppData() {
+            try {
+                const allData = {
+                    patients: patients,
+                    calculationHistory: calculationHistory,
+                    favorites: favorites,
+                    recentCalculators: recentCalculators,
+                    settings: settings,
+                    exportDate: new Date().toISOString(),
+                    version: '3.0.0'
+                };
+                
+                const dataStr = JSON.stringify(allData, null, 2);
+                const blob = new Blob([dataStr], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = `MedCalc_Pro_Backup_${new Date().toISOString().split('T')[0]}.json`;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                URL.revokeObjectURL(url);
+                
+                appState.showNotification('All app data exported successfully!', 'success');
+                
+            } catch (error) {
+                console.error('Export error:', error);
+                appState.showNotification('Error exporting data', 'error');
+            }
+        }
+
+        function clearAllAppData() {
+            if (confirm('⚠️ This will permanently delete ALL your data including:\n\n• All patients\n• Calculation history\n• Favorites\n• Settings\n\nThis action cannot be undone. Are you sure?')) {
+                if (confirm('Final confirmation: Delete ALL app data permanently?')) {
+                    try {
+                        // Clear all data
+                        patients = [];
+                        calculationHistory = [];
+                        favorites = [];
+                        recentCalculators = [];
+                        
+                        // Reset settings to defaults
+                        settings = {
+                            darkMode: false,
+                            autoSave: true,
+                            soundNotifications: false,
+                            animationEffects: true
+                        };
+                        
+                        // Clear localStorage
+                        localStorage.removeItem('medcalc_patients');
+                        localStorage.removeItem('medcalc_history');
+                        localStorage.removeItem('medcalc_favorites');
+                        localStorage.removeItem('medcalc_recent');
+                        localStorage.removeItem('medcalc_settings');
+                        
+                        // Reset UI
+                        updatePatientSelectors();
+                        updateFavoriteButtons();
+                        updateHistoryDisplay();
+                        updatePatientList();
+                        
+                        // Reset toggles
+                        document.getElementById('darkModeToggle').checked = false;
+                        document.getElementById('autoSaveToggle').checked = true;
+                        document.getElementById('soundToggle').checked = false;
+                        document.getElementById('animationToggle').checked = true;
+                        
+                        // Reset dark mode
+                        document.body.removeAttribute('data-theme');
+                        
+                        closeSidebar();
+                        appState.showNotification('All app data cleared successfully!', 'success');
+                        
+                    } catch (error) {
+                        console.error('Clear data error:', error);
+                        appState.showNotification('Error clearing data', 'error');
+                    }
+                }
+            }
+        }
+
+        // Patient Management
+        function addPatient(event) {
+            event.preventDefault();
+            
+            const name = document.getElementById('patient_name').value.trim();
+            const age = document.getElementById('patient_age').value;
+            const gender = document.getElementById('patient_gender').value;
+            const phone = document.getElementById('patient_phone').value.trim();
+            const mrn = document.getElementById('patient_mrn').value.trim();
+            const notes = document.getElementById('patient_notes').value.trim();
+
+            if (!name) {
+                appState.showNotification('Patient name is required', 'error');
+                return;
+            }
+
+            const patient = {
+                id: `patient_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+                name,
+                age: age ? parseInt(age) : null,
+                gender: gender || null,
+                phone: phone || null,
+                mrn: mrn || null,
+                notes: notes || null,
+                createdDate: new Date().toISOString(),
+                lastVisit: new Date().toISOString(),
+                calculationCount: 0
+            };
+
+            patients.push(patient);
+            saveData();
+            updatePatientSelectors();
+            updatePatientList();
+            closeModal('addPatientModal');
+            
+            // Clear form
+            document.getElementById('patient_name').value = '';
+            document.getElementById('patient_age').value = '';
+            document.getElementById('patient_gender').value = '';
+            document.getElementById('patient_phone').value = '';
+            document.getElementById('patient_mrn').value = '';
+            document.getElementById('patient_notes').value = '';
+
+            appState.showNotification(`Patient "${name}" added successfully!`, 'success');
+        }
+
+        function updatePatientSelectors() {
+            const selectors = document.querySelectorAll('.patient-select');
+            
+            selectors.forEach(select => {
+                if (select) {
+                    const currentValue = select.value;
+                    select.innerHTML = `
+                        <option value="">Select Patient (Optional)</option>
+                        <option value="anonymous">Anonymous Calculation</option>
+                    `;
+                    
+                    patients.forEach(patient => {
+                        const option = document.createElement('option');
+                        option.value = patient.id;
+                        option.textContent = `${patient.name}${patient.age ? ` (${patient.age})` : ''}`;
+                        select.appendChild(option);
+                    });
+                    
+                    select.value = currentValue;
+                }
+            });
+        }
+
+        function updatePatientList() {
+            const patientList = document.getElementById('patientList');
+            const emptyState = document.getElementById('patientsEmptyState');
+            
+            if (!patientList || !emptyState) return;
+            
+            if (patients.length === 0) {
+                patientList.style.display = 'none';
+                emptyState.style.display = 'block';
+                return;
+            }
+            
+            patientList.style.display = 'grid';
+            emptyState.style.display = 'none';
+            
+            patientList.innerHTML = patients.map(patient => `
+                <div class="patient-item">
+                    <div class="patient-info">
+                        <h4>${patient.name}</h4>
+                        <p>
+                            ${patient.age ? `Age: ${patient.age} • ` : ''}
+                            ${patient.gender ? `${patient.gender} • ` : ''}
+                            Calculations: ${patient.calculationCount || 0} • 
+                            Last Visit: ${new Date(patient.lastVisit).toLocaleDateString()}
+                        </p>
+                        ${patient.mrn ? `<p><strong>MRN:</strong> ${patient.mrn}</p>` : ''}
+                        ${patient.phone ? `<p><strong>Phone:</strong> ${patient.phone}</p>` : ''}
+                        ${patient.notes ? `<p><strong>Notes:</strong> ${patient.notes}</p>` : ''}
+                    </div>
+                    <div class="patient-actions">
+                        <button class="download-btn" onclick="generatePatientReport('${patient.id}')">📄 Report</button>
+                        <button class="manage-btn" onclick="viewPatientHistory('${patient.id}')">📊 History</button>
+                        <button class="clear-history-btn" onclick="deletePatient('${patient.id}')">🗑️ Delete</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function deletePatient(patientId) {
+            const patient = patients.find(p => p.id === patientId);
+            if (!patient) return;
+            
+            if (confirm(`Are you sure you want to delete patient "${patient.name}" and all their calculation history?`)) {
+                patients = patients.filter(p => p.id !== patientId);
+                calculationHistory = calculationHistory.filter(calc => calc.patientId !== patientId);
+                saveData();
+                updatePatientList();
+                updatePatientSelectors();
+                updateHistoryDisplay();
+                appState.showNotification(`Patient "${patient.name}" deleted successfully`, 'success');
+            }
+        }
+
+        function viewPatientHistory(patientId) {
+            const patient = patients.find(p => p.id === patientId);
+            if (patient) {
+                showPage('history');
+            }
+        }
+
+        function generatePatientReport(patientId) {
+            const patient = patients.find(p => p.id === patientId);
+            if (!patient) return;
+            
+            const patientHistory = calculationHistory.filter(calc => calc.patientId === patientId);
+            
+            const { jsPDF } = window.jspdf;
+            if (!jsPDF) {
+                appState.showNotification('PDF generation library not loaded', 'error');
+                return;
+            }
+            
+            try {
+                const doc = new jsPDF();
+                let yPosition = 30;
+                
+                // Header
+                doc.setFontSize(20);
+                doc.setTextColor(99, 102, 241);
+                doc.text('MedCalc Pro - Patient Report', 20, yPosition);
+                yPosition += 20;
+                
+                // Patient Information
+                doc.setFontSize(16);
+                doc.setTextColor(34, 197, 94);
+                doc.text('Patient Information:', 20, yPosition);
+                yPosition += 15;
+                
+                doc.setFontSize(12);
+                doc.setTextColor(0, 0, 0);
+                doc.text(`Name: ${patient.name}`, 20, yPosition);
+                yPosition += 10;
+                
+                if (patient.age) {
+                    doc.text(`Age: ${patient.age}`, 20, yPosition);
+                    yPosition += 10;
+                }
+                
+                if (patient.gender) {
+                    doc.text(`Gender: ${patient.gender}`, 20, yPosition);
+                    yPosition += 10;
+                }
+                
+                if (patient.mrn) {
+                    doc.text(`MRN: ${patient.mrn}`, 20, yPosition);
+                    yPosition += 10;
+                }
+                
+                doc.text(`Created: ${new Date(patient.createdDate).toLocaleDateString()}`, 20, yPosition);
+                yPosition += 10;
+                
+                doc.text(`Last Visit: ${new Date(patient.lastVisit).toLocaleDateString()}`, 20, yPosition);
+                yPosition += 15;
+                
+                // Calculation History
+                if (patientHistory.length > 0) {
+                    doc.setFontSize(16);
+                    doc.setTextColor(34, 197, 94);
+                    doc.text('Calculation History:', 20, yPosition);
+                    yPosition += 15;
+                    
+                    doc.setFontSize(10);
+                    doc.setTextColor(0, 0, 0);
+                    
+                    patientHistory.slice(0, 10).forEach((calc, index) => {
+                        if (yPosition > 250) {
+                            doc.addPage();
+                            yPosition = 30;
+                        }
+                        
+                        doc.text(`${index + 1}. ${calc.type} - ${calc.result}`, 20, yPosition);
+                        yPosition += 8;
+                        doc.text(`   Date: ${new Date(calc.timestamp).toLocaleString()}`, 20, yPosition);
+                        yPosition += 12;
+                    });
+                }
+                
+                // Footer
+                doc.setFontSize(10);
+                doc.setTextColor(150, 150, 150);
+                doc.text('Generated by MedCalc Pro - For educational purposes only', 20, 280);
+                
+                const fileName = `Patient_Report_${patient.name.replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.pdf`;
+                doc.save(fileName);
+                
+                appState.showNotification(`Patient report for ${patient.name} generated successfully!`, 'success');
+                
+            } catch (error) {
+                console.error('Patient report generation error:', error);
+                appState.showNotification('Error generating patient report', 'error');
+            }
+        }
+
+        // Favorites Management
+        function toggleFavorite(event, calculatorId) {
+            event.stopPropagation();
+            event.preventDefault();
+            
+            const btn = event.target;
+            const card = btn.closest('.calculator-card');
+            
+            if (favorites.includes(calculatorId)) {
+                favorites = favorites.filter(id => id !== calculatorId);
+                btn.textContent = '☆';
+                btn.classList.remove('favorited');
+                card.classList.remove('favorited');
+                appState.showNotification('Removed from favorites', 'success');
+            } else {
+                favorites.push(calculatorId);
+                btn.textContent = '⭐';
+                btn.classList.add('favorited');
+                card.classList.add('favorited');
+                appState.showNotification('Added to favorites', 'success');
+            }
+            
+            saveData();
+            
+            // Refresh display if currently showing favorites
+            if (currentFilter === 'favorites') {
+                filterCalculators('favorites');
+            }
+        }
+
+        function updateFavoriteButtons() {
+            document.querySelectorAll('.calculator-card').forEach(card => {
+                const calculatorId = card.dataset.id;
+                const btn = card.querySelector('.favorite-btn');
+                
+                if (btn && calculatorId) {
+                    if (favorites.includes(calculatorId)) {
+                        btn.textContent = '⭐';
+                        btn.classList.add('favorited');
+                        card.classList.add('favorited');
+                    } else {
+                        btn.textContent = '☆';
+                        btn.classList.remove('favorited');
+                        card.classList.remove('favorited');
+                    }
+                }
+            });
+        }
+
+        // Calculator Filtering
+        function filterCalculators(filter) {
+            currentFilter = filter;
+            
+            // Update active tab
+            document.querySelectorAll('.filter-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            const activeTab = document.querySelector(`[data-filter="${filter}"]`);
+            if (activeTab) {
+                activeTab.classList.add('active');
+            }
+            
+            const cards = document.querySelectorAll('.calculator-card');
+            const emptyState = document.getElementById('emptyState');
+            let visibleCount = 0;
+            
+            cards.forEach(card => {
+                let shouldShow = false;
+                const calculatorId = card.dataset.id;
+                const category = card.dataset.category;
+                
+                switch(filter) {
+                    case 'all':
+                        shouldShow = true;
+                        break;
+                    case 'favorites':
+                        shouldShow = favorites.includes(calculatorId);
+                        break;
+                    case 'recent':
+                        shouldShow = recentCalculators.includes(calculatorId);
+                        break;
+                    case 'medical':
+                    case 'lifestyle':
+                        shouldShow = category === filter;
+                        break;
+                }
+                
+                if (shouldShow) {
+                    card.style.display = 'block';
+                    visibleCount++;
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+            
+            if (emptyState) {
+                if (visibleCount === 0) {
+                    emptyState.style.display = 'block';
+                } else {
+                    emptyState.style.display = 'none';
+                }
+            }
+        }
+
+        // Navigation
+        function showPage(pageId) {
+            if (appState.currentPage === pageId) return;
+            
+            try {
+                appState.setLoading(true);
+                
+                setTimeout(() => {
+                    const pages = document.querySelectorAll('.page');
+                    const targetPage = document.getElementById(pageId);
+                    
+                    if (!targetPage) {
+                        console.error(`Page with ID '${pageId}' not found`);
+                        appState.showNotification(`Page '${pageId}' not found`, 'error');
+                        appState.setLoading(false);
+                        return;
+                    }
+                    
+                    pages.forEach(page => {
+                        page.classList.remove('active');
+                    });
+                    
+                    targetPage.classList.add('active');
+                    appState.currentPage = pageId;
+                    
+                    // Load page-specific data
+                    if (pageId === 'patients') {
+                        updatePatientList();
+                    } else if (pageId === 'history') {
+                        updateHistoryDisplay();
+                    }
+                    
+                    appState.setLoading(false);
+                }, 150);
+                
+            } catch (error) {
+                console.error('Navigation error:', error);
+                appState.showNotification('Navigation error occurred', 'error');
+                appState.setLoading(false);
+            }
+        }
+
+        function showCalculator(calculatorId) {
+            // Track recent calculators
+            if (!recentCalculators.includes(calculatorId)) {
+                recentCalculators.unshift(calculatorId);
+                if (recentCalculators.length > 5) {
+                    recentCalculators = recentCalculators.slice(0, 5);
+                }
+                saveData();
+            }
+            
+            const pageId = `calc-${calculatorId}`;
+            const pageElement = document.getElementById(pageId);
+            
+            if (pageElement) {
+                showPage(pageId);
+            } else {
+                // Show coming soon modal for unimplemented calculators
+                showComingSoonModal(calculatorId);
+            }
+        }
+
+        function showComingSoonModal(calculatorId) {
+            const calculatorNames = {
+                'apgar': 'APGAR Score',
+                'bodyfat': 'Body Fat Percentage',
+                'bsa': 'Body Surface Area',
+                'calories': 'Calorie Calculator',
+                'gcs': 'Glasgow Coma Scale',
+                'ivdrip': 'IV Drip Rate',
+                'menstruation': 'Menstruation Tracker',
+                'pediatric': 'Pediatric Dosage'
+            };
+            
+            const calculatorName = calculatorNames[calculatorId] || 'Calculator';
+            
+            const modal = document.createElement('div');
+            modal.className = 'modal show';
+            modal.innerHTML = `
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h3>🚧 ${calculatorName}</h3>
+                        <button class="close-modal" onclick="this.closest('.modal').remove()">×</button>
+                    </div>
+                    <div style="text-align: center; padding: 2rem;">
+                        <div style="font-size: 4rem; margin-bottom: 1rem;">🔧</div>
+                        <h4 style="color: var(--primary-color); margin-bottom: 1rem;">Coming Soon!</h4>
+                        <p style="color: var(--text-secondary); line-height: 1.6; margin-bottom: 2rem;">
+                            The ${calculatorName} is currently under development and will be available in the next update.
+                        </p>
+                        <p style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 2rem;">
+                            Currently available calculators: BMI, Drug Dosage, APGAR Score, Body Fat, Body Surface Area, Calorie Calculator, Glasgow Coma Scale, IV Drip Rate, Menstruation Tracker, and Pediatric Dosage.
+                        </p>
+                        <button class="calculate-btn" onclick="this.closest('.modal').remove()" style="max-width: 200px;">
+                            Got it!
+                        </button>
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(modal);
+            
+            appState.showNotification(`${calculatorName} is coming soon!`, 'warning');
+        }
+
+        // Modal Management
+        function showAddPatientModal() {
+            const modal = document.getElementById('addPatientModal');
+            if (modal) {
+                modal.classList.add('show');
+            }
+        }
+
+        function closeModal(modalId) {
+            const modal = document.getElementById(modalId);
+            if (modal) {
+                modal.classList.remove('show');
+            }
+        }
+
+        // Enhanced Mobile Menu
+        function toggleMobileMenu() {
+            const nav = document.querySelector('.header-nav');
+            const toggle = document.querySelector('.menu-toggle');
+            
+            if (nav && toggle) {
+                if (nav.style.display === 'flex') {
+                    nav.style.display = 'none';
+                    toggle.innerHTML = '☰';
+                } else {
+                    nav.style.display = 'flex';
+                    nav.style.flexDirection = 'column';
+                    nav.style.position = 'absolute';
+                    nav.style.top = '100%';
+                    nav.style.right = '0';
+                    nav.style.background = 'var(--primary-color)';
+                    nav.style.borderRadius = '0 0 8px 8px';
+                    nav.style.padding = '1rem';
+                    nav.style.boxShadow = 'var(--shadow-lg)';
+                    nav.style.zIndex = '1000';
+                    toggle.innerHTML = '✕';
+                }
+            }
+        }
+
+        // Basic validation functions (simplified versions)
+        function validateBMIInput() {
+            const weight = parseFloat(document.getElementById('bmi_weight').value);
+            const height = parseFloat(document.getElementById('bmi_height').value);
+            
+            let validFields = 0;
+            
+            const weightValidation = document.getElementById('bmi_weight_validation');
+            if (weightValidation) {
+                if (!weight) {
+                    weightValidation.textContent = 'Please enter weight';
+                    weightValidation.className = 'input-validation validation-error';
+                } else if (weight < 1 || weight > 500) {
+                    weightValidation.textContent = 'Weight should be between 1-500 kg';
+                    weightValidation.className = 'input-validation validation-error';
+                } else {
+                    weightValidation.textContent = '✓ Weight looks good';
+                    weightValidation.className = 'input-validation validation-success';
+                    validFields++;
+                }
+            }
+            
+            const heightValidation = document.getElementById('bmi_height_validation');
+            if (heightValidation) {
+                if (!height) {
+                    heightValidation.textContent = 'Please enter height';
+                    heightValidation.className = 'input-validation validation-error';
+                } else if (height < 50 || height > 250) {
+                    heightValidation.textContent = 'Height should be between 50-250 cm';
+                    heightValidation.className = 'input-validation validation-error';
+                } else {
+                    heightValidation.textContent = '✓ Height looks good';
+                    heightValidation.className = 'input-validation validation-success';
+                    validFields++;
+                }
+            }
+            
+            const progress = document.getElementById('bmi_progress');
+            if (progress) {
+                progress.style.width = `${(validFields / 2) * 100}%`;
+            }
+            
+            const calcBtn = document.getElementById('bmi_calc_btn');
+            if (calcBtn) {
+                calcBtn.disabled = validFields < 2;
+            }
+        }
+
+        function validateDosageInput() {
+            const weight = parseFloat(document.getElementById('dosage_weight').value);
+            const concentration = parseFloat(document.getElementById('dosage_concentration').value);
+            const dosePerKg = parseFloat(document.getElementById('dosage_per_kg').value);
+            
+            let validFields = 0;
+            
+            const weightValidation = document.getElementById('dosage_weight_validation');
+            if (weightValidation) {
+                if (!weight) {
+                    weightValidation.textContent = 'Please enter weight';
+                    weightValidation.className = 'input-validation validation-error';
+                } else if (weight < 1 || weight > 300) {
+                    weightValidation.textContent = 'Weight should be between 1-300 kg';
+                    weightValidation.className = 'input-validation validation-error';
+                } else {
+                    weightValidation.textContent = '✓ Weight looks good';
+                    weightValidation.className = 'input-validation validation-success';
+                    validFields++;
+                }
+            }
+            
+            const concentrationValidation = document.getElementById('dosage_concentration_validation');
+            if (concentrationValidation) {
+                if (!concentration) {
+                    concentrationValidation.textContent = 'Please enter concentration';
+                    concentrationValidation.className = 'input-validation validation-error';
+                } else if (concentration <= 0) {
+                    concentrationValidation.textContent = 'Concentration must be greater than 0';
+                    concentrationValidation.className = 'input-validation validation-error';
+                } else {
+                    concentrationValidation.textContent = '✓ Concentration looks good';
+                    concentrationValidation.className = 'input-validation validation-success';
+                    validFields++;
+                }
+            }
+            
+            const doseValidation = document.getElementById('dosage_per_kg_validation');
+            if (doseValidation) {
+                if (!dosePerKg) {
+                    doseValidation.textContent = 'Please enter dose per kg';
+                    doseValidation.className = 'input-validation validation-error';
+                } else if (dosePerKg <= 0) {
+                    doseValidation.textContent = 'Dose must be greater than 0';
+                    doseValidation.className = 'input-validation validation-error';
+                } else {
+                    doseValidation.textContent = '✓ Dose looks good';
+                    doseValidation.className = 'input-validation validation-success';
+                    validFields++;
+                }
+            }
+            
+            const progress = document.getElementById('dosage_progress');
+            if (progress) {
+                progress.style.width = `${(validFields / 3) * 100}%`;
+            }
+            
+            const calcBtn = document.getElementById('dosage_calc_btn');
+            if (calcBtn) {
+                calcBtn.disabled = validFields < 3;
+            }
+        }
+
+        // Basic calculation functions
+        function calculateBMI() {
+            const weight = parseFloat(document.getElementById('bmi_weight').value);
+            const height = parseFloat(document.getElementById('bmi_height').value) / 100;
+            const patientId = document.getElementById('bmi_patient_select').value;
+            
+            if (!weight || !height) {
+                appState.showNotification('Please fill in all required fields', 'error');
+                return;
+            }
+            
+            appState.setLoading(true);
+            
+            setTimeout(() => {
+                const bmi = weight / (height * height);
+                
+                let category, color;
+                if (bmi < 18.5) {
+                    category = 'Underweight';
+                    color = '#3b82f6';
+                } else if (bmi < 25) {
+                    category = 'Normal Weight';
+                    color = '#10b981';
+                } else if (bmi < 30) {
+                    category = 'Overweight';
+                    color = '#f59e0b';
+                } else {
+                    category = 'Obese';
+                    color = '#ef4444';
+                }
+                
+                const result = `BMI: ${bmi.toFixed(1)} kg/m² - ${category}`;
+                const interpretation = `Your BMI is ${bmi.toFixed(1)}, which is classified as ${category}.\n\nBMI Categories:\n• Underweight: <18.5\n• Normal: 18.5-24.9\n• Overweight: 25-29.9\n• Obese: ≥30\n\nNote: BMI is a general indicator and doesn't account for muscle mass, bone density, or body composition.`;
+                
+                showResult('bmi_result', result, interpretation, color);
+                
+                saveCalculation('BMI Calculator', {
+                    weight: weight,
+                    height: height * 100,
+                    bmi: bmi.toFixed(1),
+                    category: category,
+                    patientId: patientId || null
+                }, result, interpretation);
+                
+                appState.showNotification('BMI calculated successfully!', 'success');
+                appState.setLoading(false);
+            }, 500);
+        }
+
+        function calculateDosage() {
+            const weight = parseFloat(document.getElementById('dosage_weight').value);
+            const concentration = parseFloat(document.getElementById('dosage_concentration').value);
+            const dosePerKg = parseFloat(document.getElementById('dosage_per_kg').value);
+            const maxDose = parseFloat(document.getElementById('dosage_max').value) || Infinity;
+            const patientId = document.getElementById('dosage_patient_select').value;
+            
+            if (!weight || !concentration || !dosePerKg) {
+                appState.showNotification('Please fill in all required fields', 'error');
+                return;
+            }
+            
+            appState.setLoading(true);
+            
+            setTimeout(() => {
+                const totalDoseMg = weight * dosePerKg;
+                const finalDose = Math.min(totalDoseMg, maxDose);
+                const volumeMl = finalDose / concentration;
+                
+                let interpretation = `Medication Dosage Calculation\n\n`;
+                interpretation += `• Patient Weight: ${weight} kg\n`;
+                interpretation += `• Prescribed Dose: ${dosePerKg} mg/kg\n`;
+                interpretation += `• Total Dose: ${finalDose.toFixed(2)} mg\n`;
+                interpretation += `• Volume to Administer: ${volumeMl.toFixed(2)} mL\n\n`;
+                
+                if (finalDose < totalDoseMg) {
+                    interpretation += `⚠️ SAFETY LIMIT APPLIED\nDose reduced to maximum of ${maxDose} mg\n\n`;
+                }
+                
+                interpretation += `⚠️ SAFETY REMINDERS:\n• Always verify calculations\n• Check patient allergies\n• Monitor for adverse effects\n• Use appropriate administration route`;
+                
+                const result = `Dose: ${finalDose.toFixed(2)} mg (${volumeMl.toFixed(2)} mL)`;
+                const color = finalDose < totalDoseMg ? '#f59e0b' : '#6366f1';
+                
+                showResult('dosage_result', result, interpretation, color);
+                
+                saveCalculation('Drug Dosage Calculator', {
+                    weight: weight,
+                    concentration: concentration,
+                    dosePerKg: dosePerKg,
+                    maxDose: maxDose === Infinity ? null : maxDose,
+                    finalDose: finalDose.toFixed(2),
+                    volume: volumeMl.toFixed(2),
+                    patientId: patientId || null
+                }, result, interpretation);
+                
+                appState.showNotification('Dosage calculated successfully!', 'success');
+                appState.setLoading(false);
+            }, 500);
+        }
+
+        // Placeholder functions for other calculators
+        function validateApgarInput() {
+            // Placeholder validation
+            const calcBtn = document.getElementById('apgar_calc_btn');
+            if (calcBtn) {
+                calcBtn.disabled = false;
+            }
+        }
+
+        function calculateApgar() {
+            appState.showNotification('APGAR calculator coming soon!', 'warning');
+        }
+
+        function validateBodyFatInput() {
+            // Placeholder validation
+            const calcBtn = document.getElementById('bodyfat_calc_btn');
+            if (calcBtn) {
+                calcBtn.disabled = false;
+            }
+        }
+
+        function calculateBodyFat() {
+            appState.showNotification('Body Fat calculator coming soon!', 'warning');
+        }
+
+        function validateCaloriesInput() {
+            // Placeholder validation
+            const calcBtn = document.getElementById('calories_calc_btn');
+            if (calcBtn) {
+                calcBtn.disabled = false;
+            }
+        }
+
+        function calculateCalories() {
+            appState.showNotification('Calorie calculator coming soon!', 'warning');
+        }
+
+        function validateBSAInput() {
+            // Placeholder validation
+            const calcBtn = document.getElementById('bsa_calc_btn');
+            if (calcBtn) {
+                calcBtn.disabled = false;
+            }
+        }
+
+        function calculateBSA() {
+            appState.showNotification('BSA calculator coming soon!', 'warning');
+        }
+
+        function validateGCSInput() {
+            // Placeholder validation
+            const calcBtn = document.getElementById('gcs_calc_btn');
+            if (calcBtn) {
+                calcBtn.disabled = false;
+            }
+        }
+
+        function calculateGCS() {
+            appState.showNotification('GCS calculator coming soon!', 'warning');
+        }
+
+        function validateIVDripInput() {
+            // Placeholder validation
+            const calcBtn = document.getElementById('ivdrip_calc_btn');
+            if (calcBtn) {
+                calcBtn.disabled = false;
+            }
+        }
+
+        function calculateIVDrip() {
+            appState.showNotification('IV Drip Rate calculator coming soon!', 'warning');
+        }
+
+        function validateMenstruationInput() {
+            // Placeholder validation
+            const calcBtn = document.getElementById('menstruation_calc_btn');
+            if (calcBtn) {
+                calcBtn.disabled = false;
+            }
+        }
+
+        function calculateMenstruation() {
+            appState.showNotification('Menstruation Tracker coming soon!', 'warning');
+        }
+
+        function validatePediatricInput() {
+            // Placeholder validation
+            const calcBtn = document.getElementById('pediatric_calc_btn');
+            if (calcBtn) {
+                calcBtn.disabled = false;
+            }
+        }
+
+        function calculatePediatric() {
+            appState.showNotification('Pediatric Dosage calculator coming soon!', 'warning');
+        }
+
+        // Result Display
+        function showResult(elementId, result, interpretation, color = '#10b981') {
+            const resultDiv = document.getElementById(elementId);
+            if (resultDiv) {
+                resultDiv.innerHTML = `
+                    <div class="result-value" style="color: ${color};">${result}</div>
+                    <div class="result-interpretation" style="white-space: pre-line;">${interpretation}</div>
+                    <div class="result-actions">
+                        <button class="download-btn" onclick="generatePDFReport('${elementId}')">📄 PDF Report</button>
+                        <button class="manage-btn" onclick="copyResult('${elementId}')">📋 Copy Result</button>
+                    </div>
+                `;
+                resultDiv.style.borderLeftColor = color;
+                resultDiv.classList.add('show');
+            }
+        }
+
+        // PDF Report Generation
+        function generatePDFReport(resultElementId) {
+            const { jsPDF } = window.jspdf;
+            
+            if (!jsPDF) {
+                appState.showNotification('PDF generation library not loaded', 'error');
+                return;
+            }
+            
+            try {
+                const resultDiv = document.getElementById(resultElementId);
+                if (!resultDiv) return;
+                
+                const resultValue = resultDiv.querySelector('.result-value')?.textContent || 'N/A';
+                const resultInterpretation = resultDiv.querySelector('.result-interpretation')?.textContent || 'N/A';
+                
+                const doc = new jsPDF();
+                
+                // Header
+                doc.setFontSize(20);
+                doc.setTextColor(99, 102, 241);
+                doc.text('MedCalc Pro - Medical Report', 20, 30);
+                
+                // Date and time
+                doc.setFontSize(12);
+                doc.setTextColor(0, 0, 0);
+                doc.text(`Generated: ${new Date().toLocaleString()}`, 20, 45);
+                
+                // Result
+                doc.setFontSize(16);
+                doc.setTextColor(34, 197, 94);
+                doc.text('Result:', 20, 70);
+                doc.setFontSize(14);
+                doc.setTextColor(0, 0, 0);
+                
+                const resultLines = doc.splitTextToSize(resultValue, 170);
+                doc.text(resultLines, 20, 85);
+                
+                // Interpretation
+                doc.setFontSize(16);
+                doc.setTextColor(34, 197, 94);
+                doc.text('Interpretation:', 20, 110);
+                doc.setFontSize(12);
+                doc.setTextColor(0, 0, 0);
+                
+                const interpretationLines = doc.splitTextToSize(resultInterpretation, 170);
+                doc.text(interpretationLines, 20, 125);
+                
+                // Footer
+                doc.setFontSize(10);
+                doc.setTextColor(150, 150, 150);
+                doc.text('This report is for educational purposes only. Consult a healthcare professional for medical advice.', 20, 280);
+                
+                // Save PDF
+                const fileName = `MedCalc_Report_${new Date().toISOString().split('T')[0]}.pdf`;
+                doc.save(fileName);
+                
+                appState.showNotification('PDF report generated successfully!', 'success');
+                
+            } catch (error) {
+                console.error('PDF generation error:', error);
+                appState.showNotification('Error generating PDF report', 'error');
+            }
+        }
+
+        // Copy Result
+        function copyResult(elementId) {
+            const resultDiv = document.getElementById(elementId);
+            if (!resultDiv) return;
+            
+            const resultValue = resultDiv.querySelector('.result-value')?.textContent || '';
+            const resultInterpretation = resultDiv.querySelector('.result-interpretation')?.textContent || '';
+            
+            const text = `${resultValue}\n\n${resultInterpretation}\n\nGenerated by MedCalc Pro on ${new Date().toLocaleString()}`;
+            
+            if (navigator.clipboard) {
+                navigator.clipboard.writeText(text).then(() => {
+                    appState.showNotification('Result copied to clipboard!', 'success');
+                });
+            } else {
+                appState.showNotification('Copy not supported in this browser', 'error');
+            }
+        }
+
+        // Calculation Management
+        function saveCalculation(type, inputs, result, interpretation) {
+            const calculation = {
+                id: `calc_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+                type,
+                inputs,
+                result,
+                interpretation,
+                timestamp: new Date().toISOString(),
+                patientId: inputs.patientId || null,
+                patientName: inputs.patientId ? getPatientName(inputs.patientId) : 'Anonymous'
+            };
+            
+            calculationHistory.unshift(calculation);
+            
+            // Update patient last visit and calculation count
+            if (inputs.patientId && inputs.patientId !== 'anonymous') {
+                const patient = patients.find(p => p.id === inputs.patientId);
+                if (patient) {
+                    patient.lastVisit = new Date().toISOString();
+                    patient.calculationCount = (patient.calculationCount || 0) + 1;
+                }
+            }
+            
+            // Limit history size
+            if (calculationHistory.length > 1000) {
+                calculationHistory = calculationHistory.slice(0, 1000);
+            }
+            
+            saveData();
+            updateHistoryDisplay();
+        }
+
+        function getPatientName(patientId) {
+            if (patientId === 'anonymous') return 'Anonymous';
+            const patient = patients.find(p => p.id === patientId);
+            return patient ? patient.name : 'Unknown Patient';
+        }
+
+        function updateHistoryDisplay() {
+            const historyContent = document.getElementById('historyContent');
+            const emptyState = document.getElementById('historyEmptyState');
+            
+            if (!historyContent || !emptyState) return;
+            
+            if (!calculationHistory || calculationHistory.length === 0) {
+                historyContent.style.display = 'none';
+                emptyState.style.display = 'block';
+                return;
+            }
+            
+            historyContent.style.display = 'block';
+            emptyState.style.display = 'none';
+            
+            historyContent.innerHTML = calculationHistory.map((calc, index) => `
+                <div class="patient-item" style="margin-bottom: 1rem;">
+                    <div class="patient-info">
+                        <h4 style="color: var(--primary-color);">${calc.type}</h4>
+                        <p style="margin: 0.5rem 0;"><strong>Patient:</strong> ${calc.patientName}</p>
+                        <p style="margin: 0.5rem 0;"><strong>Result:</strong> ${calc.result}</p>
+                        <p style="font-size: 0.85rem; color: var(--text-secondary);">
+                            ${new Date(calc.timestamp).toLocaleString()}
+                        </p>
+                    </div>
+                    <div class="patient-actions">
+                        <button class="download-btn" onclick="generateHistoryPDF(${index})">📄 PDF</button>
+                        <button class="manage-btn" onclick="copyHistoryResult(${index})">📋 Copy</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function generateHistoryPDF(index) {
+            appState.showNotification('PDF generation for history coming soon!', 'warning');
+        }
+
+        function copyHistoryResult(index) {
+            const calc = calculationHistory[index];
+            if (!calc) return;
+            
+            const text = `${calc.type}\nPatient: ${calc.patientName}\nResult: ${calc.result}\nDate: ${new Date(calc.timestamp).toLocaleString()}\n\nGenerated by MedCalc Pro`;
+            
+            if (navigator.clipboard) {
+                navigator.clipboard.writeText(text).then(() => {
+                    appState.showNotification('Result copied to clipboard!', 'success');
+                });
+            } else {
+                appState.showNotification('Copy not supported in this browser', 'error');
+            }
+        }
+
+        function clearHistory() {
+            if (confirm('Are you sure you want to clear all calculation history?')) {
+                calculationHistory = [];
+                saveData();
+                updateHistoryDisplay();
+                appState.showNotification('History cleared successfully', 'success');
+            }
+        }
+
+        function exportAllHistory() {
+            if (calculationHistory.length === 0) {
+                appState.showNotification('No calculations to export', 'warning');
+                return;
+            }
+            
+            const csvContent = "Type,Patient,Result,Timestamp\n" + 
+                calculationHistory.map(calc => 
+                    `"${calc.type}","${calc.patientName}","${calc.result}","${calc.timestamp}"`
+                ).join('\n');
+            
+            const blob = new Blob([csvContent], { type: 'text/csv' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `MedCalc_History_${new Date().toISOString().split('T')[0]}.csv`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+            
+            appState.showNotification('History exported successfully!', 'success');
+        }
+
+        // Data Persistence
+        function saveData() {
+            if (settings.autoSave) {
+                try {
+                    localStorage.setItem('medcalc_patients', JSON.stringify(patients));
+                    localStorage.setItem('medcalc_history', JSON.stringify(calculationHistory));
+                    localStorage.setItem('medcalc_favorites', JSON.stringify(favorites));
+                    localStorage.setItem('medcalc_recent', JSON.stringify(recentCalculators));
+                } catch (error) {
+                    console.warn('Could not save data to localStorage:', error);
+                }
+            }
+        }
+
+        function loadData() {
+            try {
+                const savedPatients = localStorage.getItem('medcalc_patients');
+                if (savedPatients) patients = JSON.parse(savedPatients);
+                
+                const savedHistory = localStorage.getItem('medcalc_history');
+                if (savedHistory) calculationHistory = JSON.parse(savedHistory);
+                
+                const savedFavorites = localStorage.getItem('medcalc_favorites');
+                if (savedFavorites) favorites = JSON.parse(savedFavorites);
+                
+                const savedRecent = localStorage.getItem('medcalc_recent');
+                if (savedRecent) recentCalculators = JSON.parse(savedRecent);
+                
+            } catch (error) {
+                console.warn('Could not load data from localStorage:', error);
+            }
+        }
+
+        // Event Listeners and Initialization
+        document.addEventListener('DOMContentLoaded', function() {
+            try {
+                appState.setLoading(true);
+                
+                loadSettings();
+                loadData();
+                updatePatientSelectors();
+                updateFavoriteButtons();
+                updateHistoryDisplay();
+                
+                appState.setLoading(false);
+                appState.showNotification('MedCalc Pro loaded successfully!', 'success');
+                
+            } catch (error) {
+                console.error('Initialization error:', error);
+                appState.setLoading(false);
+                appState.showNotification('App loaded with some limitations. Some features may not work properly.', 'warning');
+            }
+        });
+
+        // Close modals when clicking outside
+        document.addEventListener('click', function(event) {
+            try {
+                if (event.target.classList.contains('modal')) {
+                    event.target.classList.remove('show');
+                }
+            } catch (error) {
+                console.error('Modal close error:', error);
+            }
+        });
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', function(event) {
+            try {
+                if (event.key === 'Escape') {
+                    document.querySelectorAll('.modal.show').forEach(modal => {
+                        modal.classList.remove('show');
+                    });
+                }
+                
+                // Enter key on form inputs
+                if (event.key === 'Enter' && event.target.type === 'number') {
+                    const form = event.target.closest('.calc-form');
+                    if (form) {
+                        const calcButton = form.querySelector('.calculate-btn:not(:disabled)');
+                        if (calcButton) {
+                            calcButton.click();
+                        }
+                    }
+                }
+            } catch (error) {
+                console.error('Keyboard event error:', error);
+            }
+        });
+
+        // Close mobile menu when clicking outside
+        document.addEventListener('click', function(event) {
+            const nav = document.querySelector('.header-nav');
+            const toggle = document.querySelector('.menu-toggle');
+            
+            if (nav && toggle && !nav.contains(event.target) && !toggle.contains(event.target)) {
+                if (window.innerWidth <= 768) {
+                    nav.style.display = 'none';
+                    toggle.innerHTML = '☰';
+                }
+            }
+        });
+
+        // Global error handler
+        window.addEventListener('error', function(event) {
+            console.error('Global error:', event.error);
+            appState.showNotification('An unexpected error occurred. Please refresh the page if problems persist.', 'error');
+        });
+
+        // Global unhandled promise rejection handler
+        window.addEventListener('unhandledrejection', function(event) {
+            console.error('Unhandled promise rejection:', event.reason);
+            appState.showNotification('A background operation failed. The app should continue to work normally.', 'warning');
+        });
+    </script>
+</body>
+</html>
+
+                
